@@ -17,11 +17,11 @@
   --color-accent: #f5c76b;
 }
 
-@plugin "daisyui" {
+/* @plugin "daisyui" {
   themes: light --default, dark --prefersdark;
 }
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *)); */
 
 * {
   font-family: "Poppins", sans-serif;

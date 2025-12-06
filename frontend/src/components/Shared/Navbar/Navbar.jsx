@@ -14,7 +14,7 @@ const Navbar = () => {
   const linkClass = (path) =>
     `relative font-semibold px-4 py-2 transition-all ${
       location.pathname === path
-        ? "text-primary underline underline-offset-4 hover:bg-neutral-100"
+        ? "text-primary underline underline-offset-4 hover:bg-base-200"
         : "text-neutral-600"
     } group`;
 
@@ -85,13 +85,13 @@ const Navbar = () => {
                       <>
                         <Link
                           to="/dashboard"
-                          className="px-4 py-3 hover:bg-neutral-100 font-semibold"
+                          className="px-4 py-3 hover:bg-base-200 font-semibold"
                         >
                           Dashboard
                         </Link>
                         <div
                           onClick={logOut}
-                          className="px-4 py-3 hover:bg-neutral-100 font-semibold"
+                          className="px-4 py-3 hover:bg-base-200 font-semibold"
                         >
                           Logout
                         </div>
@@ -100,13 +100,13 @@ const Navbar = () => {
                       <>
                         <Link
                           to="/login"
-                          className="px-4 py-3 hover:bg-neutral-100 font-semibold"
+                          className="px-4 py-3 hover:bg-base-200 font-semibold"
                         >
                           Login
                         </Link>
                         <Link
                           to="/signup"
-                          className="px-4 py-3 hover:bg-neutral-100 font-semibold"
+                          className="px-4 py-3 hover:bg-base-200 font-semibold"
                         >
                           Sign Up
                         </Link>
