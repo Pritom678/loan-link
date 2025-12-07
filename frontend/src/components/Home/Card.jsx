@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 
 const Card = ({ loan }) => {
-  const { image, title, category, interest, maxLimit } = loan;
+  const { image, title, category, interest, limit } = loan;
 
   return (
     <div className="bg-base-100 shadow-md rounded-xl overflow-hidden border border-base-300 hover:shadow-lg transition-shadow my-5">
@@ -28,7 +28,7 @@ const Card = ({ loan }) => {
         <p className="text-sm text-neutral-700">
           Max Limit:{" "}
           <span className="font-medium text-secondary">
-            ${maxLimit.toLocaleString()}
+            ${limit.toLocaleString()}
           </span>
         </p>
 

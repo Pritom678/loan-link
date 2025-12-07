@@ -6,7 +6,7 @@ import useAxiosSecure from "../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../Shared/LoadingSpinner";
 import ErrorPage from "../../pages/ErrorPage";
-import { TbFidgetSpinner } from "react-icons/tb";
+import { TbCoin } from "react-icons/tb";
 
 const AddLoanForm = () => {
   const { user } = useAuth();
@@ -229,7 +229,7 @@ const AddLoanForm = () => {
                   placeholder="e.g. 500000"
                   {...register("limit", {
                     required: "Limit is required",
-                    max: { value: 500000, message: "Max Limit is 500k" },
+                    max: { value: 50000000, message: "Max Limit is 50 Million" },
                   })}
                 />
                 {errors.limit && (
@@ -300,7 +300,7 @@ const AddLoanForm = () => {
               className="w-full mt-5 p-3 font-medium text-white bg-primary hover:bg-secondary rounded-md shadow-md transition"
             >
               {isPending ? (
-                <TbFidgetSpinner className="animate-spin m-auto" />
+                <TbCoin  className="animate-spin m-auto" />
               ) : (
                 "Save & Continue"
               )}

@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { FcGoogle } from "react-icons/fc";
 import useAuth from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
-import { TbFidgetSpinner } from "react-icons/tb";
+import { TbCoin } from "react-icons/tb";
 import { useForm } from "react-hook-form";
 import { imageUpload } from "../../utilities";
 
@@ -188,7 +188,7 @@ const SignUp = () => {
               className="bg-primary w-full rounded-md py-3 text-white"
             >
               {loading ? (
-                <TbFidgetSpinner className="animate-spin m-auto" />
+                <TbCoin className="animate-spin m-auto" />
               ) : (
                 "Continue"
               )}
