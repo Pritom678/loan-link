@@ -11,7 +11,7 @@ import { Link } from "react-router";
 
 export default function AboutUs() {
   return (
-    <main className="min-h-screen bg-base-200 text-gray-900">
+    <main className="min-h-screen bg-base-200 text-gray-900 mt-[-110px]">
       <section className="max-w-7xl mx-auto px-6 py-14">
         {/* Hero */}
         <div className="grid gap-10 lg:grid-cols-2 items-center">
@@ -32,12 +32,12 @@ export default function AboutUs() {
               >
                 Apply Now
               </Link>
-              <a
-                href="/contact"
+              <Link
+                to="/contact"
                 className="btn bg-white border border-primary text-primary hover:bg-base-300 rounded-xl"
               >
                 Contact Us
-              </a>
+              </Link>
             </div>
           </div>
 

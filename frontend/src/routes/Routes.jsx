@@ -15,6 +15,7 @@ import MyOrders from "../pages/Dashboard/Customer/MyOrders";
 import { createBrowserRouter } from "react-router";
 import AddLoan from "../pages/Dashboard/Manager/AddLoan";
 import AboutUs from "../pages/AboutUs/AboutUs";
+import ContactPage from "../pages/ContactPage/ContactPage";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +34,10 @@ export const router = createBrowserRouter([
       {
         path: "/about",
         element: <AboutUs />,
+      },
+      {
+        path: "/contact",
+        element: <ContactPage />,
       },
     ],
   },
