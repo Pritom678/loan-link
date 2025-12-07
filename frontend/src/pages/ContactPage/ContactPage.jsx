@@ -1,5 +1,6 @@
 import React from "react";
 import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
+import Container from "../../components/Shared/Container";
 
 export default function ContactPage() {
   return (

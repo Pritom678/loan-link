@@ -27,7 +27,7 @@ export default function AboutUs() {
 
             <div className="mt-6 flex flex-wrap gap-4">
               <Link
-                to="/apply"
+                to="/all-loans"
                 className="btn bg-primary text-white border-none hover:bg-secondary rounded-xl"
               >
                 Apply Now
@@ -149,7 +149,7 @@ export default function AboutUs() {
           </h3>
           <p className="mt-3 text-sm">A few clicks is all it takes.</p>
           <Link
-            to="/apply"
+            to="/all-loans"
             className="mt-5 inline-block btn bg-white text-primary border-none font-semibold rounded-xl "
           >
             <p className=" mt-2.5">Start Your Journey</p>

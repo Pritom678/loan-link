@@ -55,6 +55,7 @@ async function run() {
   try {
     const db = client.db("loansDB");
     const loanCollection = db.collection("loan_options");
+    const loanApplicationCollection = db.collection("loan_applications");
 
     //save loan option in db
     app.post("/loans", async (req, res) => {
@@ -65,22 +66,29 @@ async function run() {
 
     //get loan options
     app.get("/loans", async (req, res) => {
-  try {
-    const limit = parseInt(req.query.limit) || 0;
-    let cursor = loanCollection.find();
-    if (limit > 0) cursor = cursor.limit(limit);
-    const result = await cursor.toArray();
-    res.send(result);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: "Something went wrong" });
-  }
-});
+      try {
+        const limit = parseInt(req.query.limit) || 0;
+        let cursor = loanCollection.find();
+        if (limit > 0) cursor = cursor.limit(limit);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Something went wrong" });
+      }
+    });
 
     //get single loan
     app.get("/loans/:id", async (req, res) => {
       const id = req.params.id;
       const result = await loanCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
+
+    //post loan application
+    app.post("/apply-loans", async (req, res) => {
+      const ApplyLoanData = req.body;
+      const result = await loanApplicationCollection.insertOne(ApplyLoanData);
       res.send(result);
     });
 

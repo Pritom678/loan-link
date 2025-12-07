@@ -17,6 +17,7 @@ import AddLoan from "../pages/Dashboard/Manager/AddLoan";
 import AboutUs from "../pages/AboutUs/AboutUs";
 import ContactPage from "../pages/ContactPage/ContactPage";
 import AllLoans from "../pages/AllLoans/AllLoans";
+import ApplyForm from "../components/Form/ApplyForm";
 
 export const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ export const router = createBrowserRouter([
       {
         path: "/all-loans",
         element: <AllLoans />,
+      },
+      {
+        path: "/apply-loans/:id",
+        element: <ApplyForm/>,
       },
     ],
   },

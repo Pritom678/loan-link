@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router";
 
-
 // Hero slides data
 const slides = [
   {
@@ -21,8 +20,7 @@ const slides = [
   {
     id: 3,
     title: "Trusted by Thousands of Customers",
-    description:
-      "Join our community and take control of your finances today.",
+    description: "Join our community and take control of your finances today.",
     image: "https://i.ibb.co.com/6Jr74vvh/loanbanner3.jpg",
   },
 ];
@@ -68,13 +66,13 @@ const HeroBanner = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
-                    onClick={() => navigate("/apply-loan")}
+                    onClick={() => navigate("/all-loans")}
                     className="bg-accent hover:bg-secondary transition-colors text-white font-semibold px-6 py-3 rounded-lg"
                   >
                     Apply for Loan
                   </button>
                   <button
-                    onClick={() => navigate("/explore-loans")}
+                    onClick={() => navigate("/all-loans")}
                     className="bg-white hover:bg-gray-100 transition-colors text-gray-900 font-semibold px-6 py-3 rounded-lg"
                   >
                     Explore Loans

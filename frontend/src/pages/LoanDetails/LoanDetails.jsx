@@ -39,7 +39,7 @@ const LoanDetails = () => {
     limit,
   } = loan;
 
-  const handleApply = () => navigate(`/apply-loan/${id}`);
+  const handleApply = () => navigate(`/apply-loans/${id}`);
 
   return (
     <Container>
