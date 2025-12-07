@@ -40,7 +40,7 @@ const HeroBanner = () => {
   }, []);
 
   return (
-    <section className="relative h-[80vh] md:h-[90vh] overflow-hidden">
+    <section className="relative h-[80vh] md:h-screen mt-[-100px] overflow-hidden">
       <AnimatePresence mode="wait">
         {slides.map((slide, index) =>
           index === current ? (

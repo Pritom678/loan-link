@@ -1,14 +1,17 @@
-import HeroBanner from '../../components/Home/HeroBanner'
-import Plants from '../../components/Home/Plants'
+import CustomerFeedbackAuto from "../../components/Home/CustomerFeedbackAuto";
+import HeroBanner from "../../components/Home/HeroBanner";
+import HowItWorks from "../../components/Home/HowItWorks";
+import LoanOption from "../../components/Home/LoanOption";
 
 const Home = () => {
   return (
     <div>
-      <HeroBanner/>
-      <Plants />
-      {/* More components */}
+      <HeroBanner />
+      <LoanOption />
+      <HowItWorks />
+      <CustomerFeedbackAuto/>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
