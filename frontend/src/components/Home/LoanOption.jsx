@@ -11,7 +11,7 @@ const LoanOption = () => {
     queryKey: ["loans"],
     queryFn: async () => {
       const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/loan-options`
+        `${import.meta.env.VITE_API_URL}/loans?limit=6`
       );
       return result.data;
     },

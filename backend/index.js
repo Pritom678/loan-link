@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const admin = require("firebase-admin");
 const port = process.env.PORT || 3000;
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString(
@@ -57,15 +57,30 @@ async function run() {
     const loanCollection = db.collection("loan_options");
 
     //save loan option in db
-    app.post("/loan-options", async (req, res) => {
+    app.post("/loans", async (req, res) => {
       const loanData = req.body;
       const result = await loanCollection.insertOne(loanData);
       res.send(result);
     });
 
-    //get all loan option from db
-    app.get("/loan-options", async (req, res) => {
-      const result = await loanCollection.find().toArray();
+    //get loan options
+    app.get("/loans", async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 0;
+    let cursor = loanCollection.find();
+    if (limit > 0) cursor = cursor.limit(limit);
+    const result = await cursor.toArray();
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Something went wrong" });
+  }
+});
+
+    //get single loan
+    app.get("/loans/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await loanCollection.findOne({ _id: new ObjectId(id) });
       res.send(result);
     });
 

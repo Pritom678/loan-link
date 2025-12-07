@@ -20,7 +20,7 @@ const AddLoanForm = () => {
   } = useMutation({
     mutationFn: async (payload) => {
       await axiosSecure.post(
-        `${import.meta.env.VITE_API_URL}/loan-options`,
+        `${import.meta.env.VITE_API_URL}/loans`,
         payload
       );
     },

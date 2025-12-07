@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 
 const Card = ({ loan }) => {
-  const { image, title, category, interest, limit } = loan;
+  const { _id, image, title, category, interest, limit } = loan;
 
   return (
     <div className="bg-base-100 shadow-md rounded-xl overflow-hidden border border-base-300 hover:shadow-lg transition-shadow my-5">
@@ -34,7 +34,7 @@ const Card = ({ loan }) => {
 
         {/* Button */}
         <Link
-          to={`/loans/${title.toLowerCase().replace(/\s+/g, "-")}`}
+          to={`/loans/${_id}`}
           className="inline-block mt-3 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-secondary transition-colors"
         >
           View Details

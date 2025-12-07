@@ -2,7 +2,7 @@ import Home from "../pages/Home/Home";
 import ErrorPage from "../pages/ErrorPage";
 import Login from "../pages/Login/Login";
 import SignUp from "../pages/SignUp/SignUp";
-import PlantDetails from "../pages/PlantDetails/PlantDetails";
+import LoanDetails from "../pages/LoanDetails/LoanDetails";
 import PrivateRoute from "./PrivateRoute";
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -16,6 +16,7 @@ import { createBrowserRouter } from "react-router";
 import AddLoan from "../pages/Dashboard/Manager/AddLoan";
 import AboutUs from "../pages/AboutUs/AboutUs";
 import ContactPage from "../pages/ContactPage/ContactPage";
+import AllLoans from "../pages/AllLoans/AllLoans";
 
 export const router = createBrowserRouter([
   {
@@ -28,8 +29,8 @@ export const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "/plant/:id",
-        element: <PlantDetails />,
+        path: "/loans/:id",
+        element: <LoanDetails />,
       },
       {
         path: "/about",
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: "/contact",
         element: <ContactPage />,
+      },
+      {
+        path: "/all-loans",
+        element: <AllLoans />,
       },
     ],
   },
