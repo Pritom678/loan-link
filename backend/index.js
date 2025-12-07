@@ -56,12 +56,16 @@ async function run() {
     const db = client.db("loansDB");
     const loanCollection = db.collection("loan_options");
 
+    //save loan option in db
+    app.post("/loan-options", async (req, res) => {
+      const loanData = req.body;
+      const result = await loanCollection.insertOne(loanData);
+      res.send(result);
+    });
+
+    //get all loan option from db
     app.get("/loan-options", async (req, res) => {
-      const result = await loanCollection
-        .find()
-        .sort({ _id: -1 })
-        .limit(6)
-        .toArray();
+      const result = await loanCollection.find().toArray();
       res.send(result);
     });
 
