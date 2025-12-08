@@ -1,6 +1,5 @@
 import Container from "../../components/Shared/Container";
 import Heading from "../../components/Shared/Heading";
-import Button from "../../components/Shared/Button/Button";
 import { FaCheckCircle } from "react-icons/fa";
 import useAuth from "../../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";

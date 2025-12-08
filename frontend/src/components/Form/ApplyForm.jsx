@@ -2,11 +2,25 @@ import { useForm } from "react-hook-form";
 import useAuth from "../../hooks/useAuth";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router";
+import LoadingSpinner from "../Shared/LoadingSpinner";
+import ErrorPage from "../../pages/ErrorPage";
 
 const ApplyForm = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const { id } = useParams();
+
+  const { data: loanDetails = {}, isLoading: loanLoading } = useQuery({
+    queryKey: ["loanDetails", id],
+    queryFn: async () => {
+      const res = await axiosSecure.get(
+        `${import.meta.env.VITE_API_URL}/loans/${id}`
+      );
+      return res.data;
+    },
+  });
 
   const {
     isPending,
@@ -23,7 +37,7 @@ const ApplyForm = () => {
     onSuccess: (data) => {
       console.log(data);
       toast.success("Loan Added Successfully");
-      //navigate to my inventory
+      //navigate to my Loan
       mutationReset();
     },
     onError: (error) => {
@@ -62,6 +76,9 @@ const ApplyForm = () => {
 
     try {
       const ApplyLoanData = {
+        loanId: id,
+        loanTitle: loanDetails?.title,
+        interestRate: loanDetails?.interest,
         firstName,
         lastName,
         contactNumber,
@@ -84,7 +101,7 @@ const ApplyForm = () => {
   if (isError) return <ErrorPage />;
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-base-200">
+    <div className="w-full min-h-full flex items-center justify-center bg-base-200 py-20 mt-[-110px]">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="w-full max-w-3xl bg-base-100 shadow-xl rounded-lg p-8 space-y-6"
@@ -109,7 +126,7 @@ const ApplyForm = () => {
             <label className="label">Loan Title</label>
             <input
               className="input input-bordered"
-              // value={loanTitle}
+              value={loanDetails?.title || "Loading..."}
               readOnly
             />
           </div>
@@ -118,7 +135,7 @@ const ApplyForm = () => {
             <label className="label">Interest Rate (%)</label>
             <input
               className="input input-bordered"
-              // value={interestRate}
+              value={loanDetails?.interest || "Loading..."}
               readOnly
             />
           </div>

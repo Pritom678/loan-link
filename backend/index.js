@@ -59,7 +59,10 @@ async function run() {
 
     //save loan option in db
     app.post("/loans", async (req, res) => {
-      const loanData = req.body;
+      const loanData = {
+        ...req.body,
+        availability: "available",
+      };
       const result = await loanCollection.insertOne(loanData);
       res.send(result);
     });
@@ -85,11 +88,71 @@ async function run() {
       res.send(result);
     });
 
+    // update loan option
+    app.put("/loans/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updateLoanData = req.body;
+
+        const updatedDoc = {
+          $set: {
+            ...updateLoanData,
+          },
+        };
+
+        const result = await loanCollection.updateOne(
+          { _id: new ObjectId(id) },
+          updatedDoc
+        );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ message: "Loan not found" });
+        }
+
+        res.send({
+          message: "Loan updated successfully",
+          result,
+        });
+      } catch (error) {
+        console.error("Error updating loan:", error);
+        res.status(500).send({ message: "Failed to update loan" });
+      }
+    });
+
+    //delete loan option
+    app.delete("/loans/:id", async (req, res) => {
+      const { id } = req.params;
+
+      try {
+        const result = await loanCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: "Loan not found" });
+        }
+        res.json({ message: "Loan deleted successfully" });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to delete loan" });
+      }
+    });
+
     //post loan application
     app.post("/apply-loans", async (req, res) => {
-      const ApplyLoanData = req.body;
-      const result = await loanApplicationCollection.insertOne(ApplyLoanData);
-      res.send(result);
+      try {
+        const applyLoanData = {
+          ...req.body,
+          status: "Pending",
+          applicationStatus: "Unpaid",
+        };
+
+        const result = await loanApplicationCollection.insertOne(applyLoanData);
+
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Failed to submit loan application" });
+      }
     });
 
     // Send a ping to confirm a successful connection

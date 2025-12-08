@@ -18,6 +18,7 @@ import AboutUs from "../pages/AboutUs/AboutUs";
 import ContactPage from "../pages/ContactPage/ContactPage";
 import AllLoans from "../pages/AllLoans/AllLoans";
 import ApplyForm from "../components/Form/ApplyForm";
+import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
 
 export const router = createBrowserRouter([
   {
@@ -109,10 +110,10 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      // {
-      //   path: 'manage-orders',
-      //   element: <ManageOrders />,
-      // },
+      {
+        path: 'manage-loans ',
+        element: <ManageLoans />,
+      },
     ],
   },
 ]);
