@@ -56,6 +56,7 @@ async function run() {
     const db = client.db("loansDB");
     const loanCollection = db.collection("loan_options");
     const loanApplicationCollection = db.collection("loan_applications");
+    const approveLoanCollection = db.collection("approved_loan");
 
     //save loan option in db
     app.post("/loans", async (req, res) => {
@@ -159,6 +160,61 @@ async function run() {
     //get loan application
     app.get("/apply-loans", async (req, res) => {
       const result = await loanApplicationCollection.find().toArray();
+      res.send(result);
+    });
+
+    //view loan details
+    app.get("/apply-loans/:id", async (req, res) => {
+      const id = req.params.id;
+      const loan = await loanApplicationCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      res.send(loan);
+    });
+
+    //approved loan
+    app.patch("/apply-loans/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      try {
+        const loan = await loanApplicationCollection.findOne(query);
+        if (!loan) {
+          return res.status(404).send({ message: "Loan not found" });
+        }
+
+        const approvedLoan = {
+          ...loan,
+          status: "Approved",
+          approvedAt: new Date().toISOString(),
+        };
+
+        await approveLoanCollection.insertOne(approvedLoan);
+
+        await loanApplicationCollection.deleteOne(query);
+
+        res.send({
+          success: true,
+          message: "Loan approved and moved successfully",
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "An error occurred", error });
+      }
+    });
+
+    //delete loan
+    app.delete("/apply-loans/:id", async (req, res) => {
+      const id = req.params.id;
+      const deleted = await loanApplicationCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(deleted);
+    });
+
+    //get all approved loan
+    app.get("/approve-loans", async (req, res) => {
+      const result = await approveLoanCollection.find().toArray();
       res.send(result);
     });
 

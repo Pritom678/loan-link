@@ -20,6 +20,7 @@ import AllLoans from "../pages/AllLoans/AllLoans";
 import ApplyForm from "../components/Form/ApplyForm";
 import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
 import PendingLoan from "../pages/Dashboard/Manager/PendingLoan";
+import ApprovedLoan from "../pages/Dashboard/Manager/ApprovedLoan";
 
 export const router = createBrowserRouter([
   {
@@ -49,7 +50,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/apply-loans/:id",
-        element: <ApplyForm/>,
+        element: <ApplyForm />,
       },
     ],
   },
@@ -80,21 +81,21 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'pending-loans',
+        path: "pending-loans",
         element: (
           <PrivateRoute>
-            <PendingLoan/>
+            <PendingLoan />
           </PrivateRoute>
         ),
       },
-      // {
-      //   path: 'approved-loans',
-      //   element: (
-      //     <PrivateRoute>
-      //       <MyInventory/>
-      //     </PrivateRoute>
-      //   ),
-      // },
+      {
+        path: "approved-loans",
+        element: (
+          <PrivateRoute>
+            <ApprovedLoan />
+          </PrivateRoute>
+        ),
+      },
       {
         path: "manage-users",
         element: (
@@ -120,7 +121,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: 'manage-loans ',
+        path: "manage-loans ",
         element: <ManageLoans />,
       },
     ],

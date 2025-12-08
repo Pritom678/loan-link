@@ -2,8 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import LoanDataRow from "../../../components/Dashboard/TableRows/LoanDataRow";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
+import ApprovedLoanRow from "../../../components/Dashboard/TableRows/ApprovedLoanRow";
 
-const PendingLoan = () => {
+const ApprovedLoan = () => {
   const axiosSecure = useAxiosSecure();
   const {
     data: loans = [],
@@ -13,7 +14,7 @@ const PendingLoan = () => {
     queryKey: ["loan"],
     queryFn: async () => {
       const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/apply-loans`
+        `${import.meta.env.VITE_API_URL}/approve-loans`
       );
       return result.data;
     },
@@ -50,7 +51,7 @@ const PendingLoan = () => {
                       scope="col"
                       className="px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal"
                     >
-                      Date
+                      Approved Date
                     </th>
                     <th
                       scope="col"
@@ -63,7 +64,7 @@ const PendingLoan = () => {
                 <tbody>
                   {loans && loans.length > 0 ? (
                     loans.map((loan) => (
-                      <LoanDataRow
+                      <ApprovedLoanRow
                         key={loan._id}
                         loan={loan}
                         refetch={refetch}
@@ -75,7 +76,7 @@ const PendingLoan = () => {
                         colSpan="5"
                         className="text-center py-4 text-gray-500"
                       >
-                        No pending loans found.
+                        No Approved loans found.
                       </td>
                     </tr>
                   )}
@@ -89,4 +90,4 @@ const PendingLoan = () => {
   );
 };
 
-export default PendingLoan;
+export default ApprovedLoan;

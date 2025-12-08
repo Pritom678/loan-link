@@ -1,43 +1,7 @@
-// import { useState } from "react";
-
+import React from "react";
 import { FaCheck, FaEye, FaTimes } from "react-icons/fa";
-import useAxiosSecure from "../../../hooks/useAxiosSecure";
-import toast from "react-hot-toast";
 
-const LoanDataRow = ({ loan, refetch }) => {
-  const axiosSecure = useAxiosSecure();
-
-  const handleApprove = async () => {
-    try {
-      await axiosSecure.patch(`/apply-loans/${loan._id}`);
-      toast.success("Loan Approved!");
-      refetch();
-    } catch (err) {
-      toast.error("Approval failed", err);
-    }
-  };
-
-  const handleReject = async () => {
-    try {
-      await axiosSecure.delete(`/apply-loans/${loan._id}`);
-      toast.success("Loan Rejected!");
-      refetch();
-    } catch (err) {
-      toast.error("Delete failed", err);
-    }
-  };
-
-  const handleView = async () => {
-    try {
-      const res = await axiosSecure.get(`/apply-loans/${loan._id}`);
-      console.log(res.data); // open modal here
-      // setModalData(res.data);
-      // setIsModalOpen(true);
-    } catch (err) {
-      toast.error("Failed to load details", err);
-    }
-  };
-
+const ApprovedLoanRow = ({ loan }) => {
   return (
     <tr>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
@@ -52,31 +16,29 @@ const LoanDataRow = ({ loan, refetch }) => {
         <p className="text-gray-900 ">{loan.loanAmount}</p>
       </td>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900 ">{loan.date}</p>
+        <p className="text-gray-900 ">{loan.approvedAt}</p>
       </td>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
         <div className="flex items-center gap-3">
-          {/* Approve Button */}
+          
           <button
-            onClick={handleApprove}
+            // onClick={handleApprove}
             className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
             title="Approve"
           >
             <FaCheck />
           </button>
-
           {/* Reject Button */}
           <button
-            onClick={handleReject}
+            // onClick={handleReject}
             className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
             title="Reject"
           >
             <FaTimes />
           </button>
-
           {/* View Button */}
           <button
-            onClick={handleView}
+            // onClick={handleView}
             className="p-2 bg-accent hover:bg-secondary text-white rounded-md"
             title="View Details"
           >
@@ -88,4 +50,4 @@ const LoanDataRow = ({ loan, refetch }) => {
   );
 };
 
-export default LoanDataRow;
+export default ApprovedLoanRow;
