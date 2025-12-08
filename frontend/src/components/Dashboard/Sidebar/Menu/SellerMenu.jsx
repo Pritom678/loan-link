@@ -5,7 +5,8 @@ const SellerMenu = () => {
   return (
     <>
       <MenuItem icon={BsFillHouseAddFill} label="Add Loan" address="add-loan" />
-      <MenuItem icon={MdHomeWork} label="My Inventory" address="my-inventory" />
+      <MenuItem icon={MdHomeWork} label="Pending Loan Application" address="pending-loans" />
+      <MenuItem icon={MdHomeWork} label="Approved Loan Application" address="approved-loans" />
       <MenuItem
         icon={MdOutlineManageHistory}
         label="Manage Loans"

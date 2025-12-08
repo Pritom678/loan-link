@@ -19,6 +19,7 @@ import ContactPage from "../pages/ContactPage/ContactPage";
 import AllLoans from "../pages/AllLoans/AllLoans";
 import ApplyForm from "../components/Form/ApplyForm";
 import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
+import PendingLoan from "../pages/Dashboard/Manager/PendingLoan";
 
 export const router = createBrowserRouter([
   {
@@ -78,8 +79,16 @@ export const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: 'pending-loans',
+        element: (
+          <PrivateRoute>
+            <PendingLoan/>
+          </PrivateRoute>
+        ),
+      },
       // {
-      //   path: 'my-inventory',
+      //   path: 'approved-loans',
       //   element: (
       //     <PrivateRoute>
       //       <MyInventory/>

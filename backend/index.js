@@ -144,6 +144,7 @@ async function run() {
           ...req.body,
           status: "Pending",
           applicationStatus: "Unpaid",
+          date: new Date().toISOString(),
         };
 
         const result = await loanApplicationCollection.insertOne(applyLoanData);
@@ -153,6 +154,12 @@ async function run() {
         console.error(error);
         res.status(500).send({ message: "Failed to submit loan application" });
       }
+    });
+
+    //get loan application
+    app.get("/apply-loans", async (req, res) => {
+      const result = await loanApplicationCollection.find().toArray();
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection
