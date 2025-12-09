@@ -57,6 +57,7 @@ async function run() {
     const loanCollection = db.collection("loan_options");
     const loanApplicationCollection = db.collection("loan_applications");
     const approveLoanCollection = db.collection("approved_loan");
+    const usersCollection = db.collection("users");
 
     //save loan option in db
     app.post("/loans", async (req, res) => {
@@ -150,6 +151,11 @@ async function run() {
 
         const result = await loanApplicationCollection.insertOne(applyLoanData);
 
+        await usersCollection.updateOne(
+          { email: applyLoanData.userEmail },
+          { $inc: { totalApplied: 1, totalPending: 1 } }
+        );
+
         res.send(result);
       } catch (error) {
         console.error(error);
@@ -193,6 +199,13 @@ async function run() {
 
         await loanApplicationCollection.deleteOne(query);
 
+        await usersCollection.updateOne(
+          { email: loan.userEmail },
+          {
+            $inc: { totalPending: -1, totalApproved: 1 },
+          }
+        );
+
         res.send({
           success: true,
           message: "Loan approved and moved successfully",
@@ -209,6 +222,14 @@ async function run() {
       const deleted = await loanApplicationCollection.deleteOne({
         _id: new ObjectId(id),
       });
+
+      if (loan) {
+        await usersCollection.updateOne(
+          { email: loan.userEmail },
+          { $inc: { totalPending: -1 } }
+        );
+      }
+
       res.send(deleted);
     });
 
@@ -234,6 +255,41 @@ async function run() {
         _id: new ObjectId(id),
       });
       res.send(loan);
+    });
+
+    //save and update user
+    app.post("/user", async (req, res) => {
+      const userData = req.body;
+
+      const query = {
+        email: userData.email,
+      };
+
+      const alreadyExists = await usersCollection.findOne(query);
+      console.log("User already exists---> ", !!alreadyExists);
+
+      if (alreadyExists) {
+        console.log("Updating user info---> ");
+        const result = await usersCollection.updateOne(query, {
+          $set: { last_loggedIn: new Date().toISOString() },
+        });
+        return res.send(result);
+      }
+      const newUser = {
+        ...userData,
+        created_at: new Date().toISOString(),
+        last_loggedIn: new Date().toISOString(),
+        role: "borrower",
+
+        // 🎯 Initial stats
+        totalApplied: 0,
+        totalPending: 0,
+        totalApproved: 0,
+      };
+
+      console.log("saving new user info---> ");
+      const result = await usersCollection.insertOne(newUser);
+      res.send(result);
     });
 
     // Send a ping to confirm a successful connection

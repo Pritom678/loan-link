@@ -1,59 +1,76 @@
-import useAuth from '../../../hooks/useAuth'
-import coverImg from '../../../assets/images/cover.jpg'
+import useAuth from "../../../hooks/useAuth";
+import coverImg from "../../../assets/images/cover.jpg";
+import { FaEdit, FaSignOutAlt } from "react-icons/fa";
 
 const Profile = () => {
-  const { user } = useAuth()
+  const { user, logOut } = useAuth();
 
   return (
-    <div className='flex justify-center items-center h-screen'>
-      <div className='bg-white shadow-lg rounded-2xl md:w-4/5 lg:w-3/5'>
-        <img
-          alt='cover photo'
-          src={coverImg}
-          className='w-full mb-4 rounded-t-lg h-56'
-        />
-        <div className='flex flex-col items-center justify-center p-4 -mt-16'>
-          <a href='#' className='relative block'>
+    <div className="min-h-screen flex justify-center items-center bg-base-200 px-4">
+      <div className="bg-white/90 shadow-xl rounded-2xl overflow-hidden w-full max-w-3xl">
+        {/* Header Cover */}
+        <div className="relative">
+          <img
+            src={coverImg}
+            alt="cover photo"
+            className="w-full h-48 object-cover"
+          />
+          {/* Profile Avatar */}
+          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
             <img
-              alt='profile'
               src={user?.photoURL}
-              className='mx-auto object-cover rounded-full h-24 w-24  border-2 border-white '
+              alt="profile"
+              className="w-28 h-28 rounded-full border-4 border-white shadow-md object-cover"
             />
-          </a>
+          </div>
+        </div>
 
-          <p className='p-2 px-4 text-xs text-white bg-lime-500 rounded-full'>
-            Customer
-          </p>
-          <p className='mt-2 text-xl font-medium text-gray-800 '>
-            User Id: {user?.uid}
-          </p>
-          <div className='w-full p-2 mt-4 rounded-lg'>
-            <div className='flex flex-wrap items-center justify-between text-sm text-gray-600 '>
-              <p className='flex flex-col'>
-                Name
-                <span className='font-bold text-gray-600 '>
-                  {user?.displayName}
-                </span>
-              </p>
-              <p className='flex flex-col'>
-                Email
-                <span className='font-bold text-gray-600 '>{user?.email}</span>
-              </p>
+        <div className="pt-16 pb-6 px-6 text-center">
+          {/* User Name */}
+          <h2 className="text-2xl font-semibold text-gray-800">
+            {user?.displayName || "Unknown"}
+          </h2>
+          <p className="text-sm text-gray-500">{user?.email}</p>
 
-              <div>
-                <button className='bg-lime-500  px-10 py-1 rounded-lg text-white cursor-pointer hover:bg-lime-800 block mb-1'>
-                  Update Profile
-                </button>
-                <button className='bg-lime-500 px-7 py-1 rounded-lg text-white cursor-pointer hover:bg-lime-800'>
-                  Change Password
-                </button>
-              </div>
+          {/* Role Tag */}
+          <div className="mt-2 inline-block bg-primary/20 text-primary px-4 py-1 rounded-full text-xs font-semibold">
+            Borrower
+          </div>
+
+          {/* Stats Section */}
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="bg-base-100 py-3 rounded-lg shadow-sm">
+              <p className="text-lg font-bold text-primary">05</p>
+              <p className="text-xs text-gray-500">Loans Applied</p>
+            </div>
+
+            <div className="bg-base-100 py-3 rounded-lg shadow-sm">
+              <p className="text-lg font-bold text-green-600">03</p>
+              <p className="text-xs text-gray-500">Approved Loans</p>
+            </div>
+
+            <div className="bg-base-100 py-3 rounded-lg shadow-sm">
+              <p className="text-lg font-bold text-yellow-600">02</p>
+              <p className="text-xs text-gray-500">Pending Loans</p>
             </div>
           </div>
+
+          {/* Buttons */}
+          <div className="flex gap-3 justify-center mt-6">
+            <button className="btn btn-primary btn-sm gap-2">
+              <FaEdit /> Edit Profile
+            </button>
+            <button className="btn btn-secondary btn-sm gap-2" onClick={logOut}>
+              <FaSignOutAlt /> Log Out
+            </button>
+          </div>
+
+          {/* ID */}
+          <p className="text-xs text-gray-500 mt-4">User ID: {user?.uid}</p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

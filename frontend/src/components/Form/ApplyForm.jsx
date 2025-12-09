@@ -79,6 +79,7 @@ const ApplyForm = () => {
         loanId: id,
         loanTitle: loanDetails?.title,
         interestRate: loanDetails?.interest,
+        userEmail: user?.email,
         firstName,
         lastName,
         contactNumber,
