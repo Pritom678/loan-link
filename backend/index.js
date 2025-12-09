@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const admin = require("firebase-admin");
 const port = process.env.PORT || 3000;
 const decoded = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString(
@@ -58,6 +59,35 @@ async function run() {
     const loanApplicationCollection = db.collection("loan_applications");
     const approveLoanCollection = db.collection("approved_loan");
     const usersCollection = db.collection("users");
+
+    // Create a Checkout session
+    app.post("/create-checkout-session", async (req, res) => {
+      const paymentInfo = req.body;
+
+      const session = await stripe.checkout.sessions.create({
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                title: paymentInfo.title,
+              },
+              unit_amount: paymentInfo?.price * 100,
+            },
+            quantity: paymentInfo?.quantity,
+          },
+        ],
+        customer_email: paymentInfo?.customerEmail,
+        mode: "payment",
+        metadata: {
+          loanId: paymentInfo?.loanId,
+          customer: paymentInfo?.customerEmail,
+        },
+        success_url: `${process.env.CLIENT_URL}/my-loans?success=true&loanId=${paymentInfo?.loanId}`,
+        cancel_url: `${process.env.CLIENT_URL}/my-loans?canceled=true`,
+      });
+      res.send({ url: session.url });
+    });
 
     //save loan option in db
     app.post("/loans", async (req, res) => {
@@ -170,7 +200,7 @@ async function run() {
         .toArray();
       res.send(result);
     });
-    
+
     //get all loan data for Borrower
     app.get("/apply-loans/user/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
@@ -240,20 +270,62 @@ async function run() {
     });
 
     //delete loan
+
+    // app.delete("/apply-loans/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const deleted = await loanApplicationCollection.deleteOne({
+    //     _id: new ObjectId(id),
+    //   });
+
+    //   if (loan) {
+    //     await usersCollection.updateOne(
+    //       { email: loan.userEmail },
+    //       { $inc: { totalPending: -1 } }
+    //     );
+    //   }
+
+    //   res.send(deleted);
+    // });
+
+    //handle delete
+    // DELETE a loan application
     app.delete("/apply-loans/:id", async (req, res) => {
-      const id = req.params.id;
-      const deleted = await loanApplicationCollection.deleteOne({
-        _id: new ObjectId(id),
-      });
+      const { id } = req.params;
 
-      if (loan) {
-        await usersCollection.updateOne(
-          { email: loan.userEmail },
-          { $inc: { totalPending: -1 } }
-        );
+      try {
+        // Find the loan first
+        const loan = await loanApplicationCollection.findOne({
+          _id: new ObjectId(id),
+        });
+
+        if (!loan) {
+          return res.status(404).json({ message: "Loan not found" });
+        }
+
+        // Delete the loan from the collection
+        const result = await loanApplicationCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        // Update user's stats if needed
+        if (loan.userEmail) {
+          await usersCollection.updateOne(
+            { email: loan.userEmail },
+            { $inc: { totalPending: -1, totalApplied: -1 } }
+          );
+        }
+
+        res.json({
+          success: true,
+          message: "Loan cancelled successfully",
+          result,
+        });
+      } catch (error) {
+        console.error("Failed to delete loan:", error);
+        res
+          .status(500)
+          .json({ success: false, message: "Failed to cancel loan", error });
       }
-
-      res.send(deleted);
     });
 
     //get all approved loan
@@ -284,32 +356,32 @@ async function run() {
     app.post("/user", async (req, res) => {
       const userData = req.body;
 
-      const query = {
-        email: userData.email,
-      };
-
+      const query = { email: userData.email };
       const alreadyExists = await usersCollection.findOne(query);
-      console.log("User already exists---> ", !!alreadyExists);
 
       if (alreadyExists) {
-        console.log("Updating user info---> ");
-        const result = await usersCollection.updateOne(query, {
-          $set: { last_loggedIn: new Date().toISOString() },
-        });
+        // Update last login + role if provided
+        const updateDoc = {
+          $set: {
+            last_loggedIn: new Date().toISOString(),
+            role: userData.role || alreadyExists.role || "borrower",
+          },
+        };
+        const result = await usersCollection.updateOne(query, updateDoc);
         return res.send(result);
       }
+
+      // New user
       const newUser = {
         ...userData,
+        role: userData.role || "borrower", // default role
         created_at: new Date().toISOString(),
         last_loggedIn: new Date().toISOString(),
-        role: "borrower",
-
         totalApplied: 0,
         totalPending: 0,
         totalApproved: 0,
       };
 
-      console.log("saving new user info---> ");
       const result = await usersCollection.insertOne(newUser);
       res.send(result);
     });

@@ -7,10 +7,18 @@ const BorrowerLoanDataRow = ({ loan, onView, onCancel, onPay }) => {
 
   return (
     <tr className="hover:bg-gray-50">
-      <td className="px-6 py-4 text-center text-sm text-gray-900">{loan.loanId}</td>
-      <td className="px-6 py-4 text-center text-sm text-gray-900">{loan.loanTitle}</td>
-      <td className="px-6 py-4 text-center text-sm text-gray-900">{loan.loanAmount}</td>
-      <td className={`px-6 py-4 text-center text-sm ${statusColors[loan.status]}`}>
+      <td className="px-6 py-4 text-center text-sm text-gray-900">
+        {loan.loanId}
+      </td>
+      <td className="px-6 py-4 text-center text-sm text-gray-900">
+        {loan.loanTitle}
+      </td>
+      <td className="px-6 py-4 text-center text-sm text-gray-900">
+        {loan.loanAmount}
+      </td>
+      <td
+        className={`px-6 py-4 text-center text-sm ${statusColors[loan.status]}`}
+      >
         {loan.status}
       </td>
       <td className="px-6 py-4 text-center text-sm flex justify-center gap-2">

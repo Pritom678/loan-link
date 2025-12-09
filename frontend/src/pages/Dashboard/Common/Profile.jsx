@@ -46,7 +46,7 @@ const Profile = () => {
 
           {/* Role Tag */}
           <div className="mt-2 inline-block bg-primary/20 text-primary px-4 py-1 rounded-full text-xs font-semibold">
-            Borrower
+            {userInfo?.role}
           </div>
 
           {/* Stats Section */}

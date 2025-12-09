@@ -4,8 +4,9 @@ import BorrowerLoanDataRow from "../../../components/Dashboard/TableRows/Borrowe
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import DeleteModal from "../../../components/Modal/DeleteModal";
-import ViewLoanModal from "../../../components/Modal/ViewLoanModal";
 import ViewMyLoanModal from "../../../components/Modal/ViewMyLoanModal";
+import toast from "react-hot-toast";
+import PayModal from "../../../components/Modal/PayModal";
 
 const MyLoans = () => {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ const MyLoans = () => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isPayOpen, setIsPayOpen] = useState(false);
 
   const { data: userLoans = [], refetch } = useQuery({
     queryKey: ["userLoans", user?.email],
@@ -24,6 +26,24 @@ const MyLoans = () => {
     },
   });
 
+  const handleDelete = async (loanId) => {
+    if (!loanId) return;
+
+    try {
+      await axiosSecure.delete(`/apply-loans/${loanId}`);
+
+      setIsCancelOpen(false);
+      setSelectedLoan(null);
+
+      refetch();
+
+      toast.success("Loan cancelled successfully!");
+    } catch (error) {
+      console.error("Failed to cancel loan:", error);
+      toast.error("Failed to cancel loan. Try again.");
+    }
+  };
+
   const openCancelModal = (loan) => {
     setSelectedLoan(loan);
     setIsCancelOpen(true);
@@ -32,6 +52,12 @@ const MyLoans = () => {
   const openViewModal = (loan) => {
     setSelectedLoan(loan);
     setIsViewOpen(true);
+  };
+
+  // open pay modal
+  const openPayModal = (loan) => {
+    setSelectedLoan(loan);
+    setIsPayOpen(true);
   };
 
   return (
@@ -57,7 +83,7 @@ const MyLoans = () => {
                       loan={loan}
                       onView={() => openViewModal(loan)}
                       onCancel={() => openCancelModal(loan)}
-                      onPay={() => alert(`Paying loan ${loan.loanId}`)}
+                      onPay={() => openPayModal(loan)}
                     />
                   ))}
                 </tbody>
@@ -74,11 +100,16 @@ const MyLoans = () => {
             isOpen={isCancelOpen}
             closeModal={() => setIsCancelOpen(false)}
             refetch={refetch}
-            loanId={selectedLoan._id}
+            onConfirm={() => handleDelete(selectedLoan._id)}
           />
           <ViewMyLoanModal
             isOpen={isViewOpen}
             closeModal={() => setIsViewOpen(false)}
+            loan={selectedLoan}
+          />
+          <PayModal
+            isOpen={isPayOpen}
+            closeModal={() => setIsPayOpen(false)}
             loan={selectedLoan}
           />
         </>

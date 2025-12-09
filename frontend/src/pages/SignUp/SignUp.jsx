@@ -20,7 +20,7 @@ const SignUp = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    const { name, image, email, password } = data;
+    const { name, image, email, password, role } = data;
 
     const imageFile = image[0];
 
@@ -29,7 +29,7 @@ const SignUp = () => {
 
       //2. User Registration
       const result = await createUser(email, password);
-      await saveOrUpdateUser({ name, email, image: imageURL });
+      await saveOrUpdateUser({ name, email, image: imageURL, role });
 
       //3. Save username & profile photo
       await updateUserProfile(name, imageURL);
@@ -53,6 +53,7 @@ const SignUp = () => {
         name: user?.displayName,
         email: user?.email,
         image: user?.photoURL,
+        role: "borrower",
       });
 
       navigate(from, { replace: true });
@@ -152,6 +153,25 @@ const SignUp = () => {
               {errors.email && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.email.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="role" className="block mb-2 text-sm">
+                Select Role
+              </label>
+              <select
+                id="role"
+                className="w-full px-3 py-2 border rounded-md border-gray-300 bg-gray-200 focus:outline-secondary text-gray-900"
+                {...register("role", { required: "Role is required" })}
+              >
+                <option value="">Select Role</option>
+                <option value="borrower">Borrower</option>
+                <option value="manager">Manager</option>
+              </select>
+              {errors.role && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.role.message}
                 </p>
               )}
             </div>
