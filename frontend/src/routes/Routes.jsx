@@ -11,7 +11,7 @@ import Profile from "../pages/Dashboard/Common/Profile";
 import Statistics from "../pages/Dashboard/Common/Statistics";
 import MainLayout from "../layouts/MainLayout";
 
-import MyOrders from "../pages/Dashboard/Customer/MyOrders";
+import MyLoans from "../pages/Dashboard/Customer/MyLoans";
 import { createBrowserRouter } from "react-router";
 import AddLoan from "../pages/Dashboard/Manager/AddLoan";
 import AboutUs from "../pages/AboutUs/AboutUs";
@@ -113,10 +113,10 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "my-orders",
+        path: "my-loans",
         element: (
           <PrivateRoute>
-            <MyOrders />
+            <MyLoans />
           </PrivateRoute>
         ),
       },

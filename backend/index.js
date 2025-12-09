@@ -163,9 +163,25 @@ async function run() {
       }
     });
 
-    //get loan application
-    app.get("/apply-loans", async (req, res) => {
-      const result = await loanApplicationCollection.find().toArray();
+    // Get only Pending loans
+    app.get("/pending-loans", async (req, res) => {
+      const result = await loanApplicationCollection
+        .find({ status: "Pending" })
+        .toArray();
+      res.send(result);
+    });
+    
+    //get all loan data for Borrower
+    app.get("/apply-loans/user/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+
+      if (req.tokenEmail !== email) {
+        return res.status(403).send({ message: "Forbidden Access!" });
+      }
+
+      const result = await loanApplicationCollection
+        .find({ userEmail: email })
+        .toArray();
       res.send(result);
     });
 
@@ -189,16 +205,23 @@ async function run() {
           return res.status(404).send({ message: "Loan not found" });
         }
 
-        const approvedLoan = {
+        const approvedData = {
           ...loan,
           status: "Approved",
           approvedAt: new Date().toISOString(),
         };
 
-        await approveLoanCollection.insertOne(approvedLoan);
+        // Update in the main loan application collection
+        await loanApplicationCollection.updateOne(query, {
+          $set: {
+            status: "Approved",
+          },
+        });
 
-        await loanApplicationCollection.deleteOne(query);
+        // Insert into approved loans collection
+        await approveLoanCollection.insertOne(approvedData);
 
+        // Update user stats
         await usersCollection.updateOne(
           { email: loan.userEmail },
           {
@@ -208,7 +231,7 @@ async function run() {
 
         res.send({
           success: true,
-          message: "Loan approved and moved successfully",
+          message: "Loan approved successfully",
         });
       } catch (error) {
         console.error(error);
@@ -281,7 +304,6 @@ async function run() {
         last_loggedIn: new Date().toISOString(),
         role: "borrower",
 
-        // 🎯 Initial stats
         totalApplied: 0,
         totalPending: 0,
         totalApproved: 0,
@@ -290,6 +312,13 @@ async function run() {
       console.log("saving new user info---> ");
       const result = await usersCollection.insertOne(newUser);
       res.send(result);
+    });
+
+    //get user info by email
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = await usersCollection.findOne({ email });
+      res.send(user);
     });
 
     // Send a ping to confirm a successful connection

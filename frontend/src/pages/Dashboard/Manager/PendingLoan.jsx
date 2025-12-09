@@ -23,7 +23,7 @@ const PendingLoan = () => {
     queryKey: ["loan"],
     queryFn: async () => {
       const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/apply-loans`
+        `${import.meta.env.VITE_API_URL}/pending-loans`
       );
       return result.data;
     },

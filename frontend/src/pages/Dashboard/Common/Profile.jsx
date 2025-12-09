@@ -1,9 +1,21 @@
 import useAuth from "../../../hooks/useAuth";
 import coverImg from "../../../assets/images/cover.jpg";
 import { FaEdit, FaSignOutAlt } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const Profile = () => {
+  const axiosSecure = useAxiosSecure();
   const { user, logOut } = useAuth();
+
+  const { data: userInfo = {} } = useQuery({
+    queryKey: ["userInfo", user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/user/${user?.email}`);
+      return res.data;
+    },
+  });
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-base-200 px-4">
@@ -40,17 +52,23 @@ const Profile = () => {
           {/* Stats Section */}
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-base-100 py-3 rounded-lg shadow-sm">
-              <p className="text-lg font-bold text-primary">05</p>
+              <p className="text-lg font-bold text-primary">
+                {userInfo?.totalApplied || 0}
+              </p>
               <p className="text-xs text-gray-500">Loans Applied</p>
             </div>
 
             <div className="bg-base-100 py-3 rounded-lg shadow-sm">
-              <p className="text-lg font-bold text-green-600">03</p>
+              <p className="text-lg font-bold text-green-600">
+                {userInfo?.totalApproved || 0}
+              </p>
               <p className="text-xs text-gray-500">Approved Loans</p>
             </div>
 
             <div className="bg-base-100 py-3 rounded-lg shadow-sm">
-              <p className="text-lg font-bold text-yellow-600">02</p>
+              <p className="text-lg font-bold text-yellow-600">
+                {userInfo?.totalPending || 0}
+              </p>
               <p className="text-xs text-gray-500">Pending Loans</p>
             </div>
           </div>
