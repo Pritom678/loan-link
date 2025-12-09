@@ -1,10 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import LoanDataRow from "../../../components/Dashboard/TableRows/LoanDataRow";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
 import ApprovedLoanRow from "../../../components/Dashboard/TableRows/ApprovedLoanRow";
+import { useState } from "react";
+import ViewApprovedLoanModal from "../../../components/Modal/ViewApprovedLoanModal";
 
 const ApprovedLoan = () => {
+  const [selectedLoan, setSelectedLoan] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedLoan(null);
+  };
+
   const axiosSecure = useAxiosSecure();
   const {
     data: loans = [],
@@ -14,7 +23,7 @@ const ApprovedLoan = () => {
     queryKey: ["loan"],
     queryFn: async () => {
       const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/approve-loans`
+        `${import.meta.env.VITE_API_URL}/approved-loans`
       );
       return result.data;
     },
@@ -68,6 +77,8 @@ const ApprovedLoan = () => {
                         key={loan._id}
                         loan={loan}
                         refetch={refetch}
+                        setSelectedLoan={setSelectedLoan}
+                        setIsModalOpen={setIsModalOpen}
                       />
                     ))
                   ) : (
@@ -82,6 +93,12 @@ const ApprovedLoan = () => {
                   )}
                 </tbody>
               </table>
+              {isModalOpen && (
+                <ViewApprovedLoanModal
+                  loan={selectedLoan}
+                  closeModal={closeModal}
+                />
+              )}
             </div>
           </div>
         </div>

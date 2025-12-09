@@ -1,7 +1,36 @@
 import React from "react";
-import { FaCheck, FaEye, FaTimes } from "react-icons/fa";
+import { FaEye, FaTimes } from "react-icons/fa";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import toast from "react-hot-toast";
 
-const ApprovedLoanRow = ({ loan }) => {
+const ApprovedLoanRow = ({
+  loan,
+  refetch,
+  setSelectedLoan,
+  setIsModalOpen,
+}) => {
+  const axiosSecure = useAxiosSecure();
+
+  const handleReject = async () => {
+    try {
+      await axiosSecure.delete(`/approved-loans/${loan._id}`);
+      toast.success("Loan Rejected!");
+      refetch();
+    } catch (err) {
+      toast.error("Delete failed", err);
+    }
+  };
+
+  const handleView = async () => {
+    try {
+      const res = await axiosSecure.get(`/approved-loans/${loan._id}`);
+      setSelectedLoan(res.data);
+      setIsModalOpen(true);
+    } catch (err) {
+      toast.error("Failed to load details", err);
+    }
+  };
+
   return (
     <tr>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
@@ -20,17 +49,9 @@ const ApprovedLoanRow = ({ loan }) => {
       </td>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
         <div className="flex items-center gap-3">
-          
-          <button
-            // onClick={handleApprove}
-            className="p-2 bg-green-500 hover:bg-green-600 text-white rounded-md"
-            title="Approve"
-          >
-            <FaCheck />
-          </button>
           {/* Reject Button */}
           <button
-            // onClick={handleReject}
+            onClick={handleReject}
             className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
             title="Reject"
           >
@@ -38,7 +59,7 @@ const ApprovedLoanRow = ({ loan }) => {
           </button>
           {/* View Button */}
           <button
-            // onClick={handleView}
+            onClick={handleView}
             className="p-2 bg-accent hover:bg-secondary text-white rounded-md"
             title="View Details"
           >

@@ -2,8 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import LoanDataRow from "../../../components/Dashboard/TableRows/LoanDataRow";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
+import { useState } from "react";
+import ViewLoanModal from "../../../components/Modal/ViewLoanModal";
 
 const PendingLoan = () => {
+  const [selectedLoan, setSelectedLoan] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedLoan(null);
+  };
+
   const axiosSecure = useAxiosSecure();
   const {
     data: loans = [],
@@ -67,6 +77,8 @@ const PendingLoan = () => {
                         key={loan._id}
                         loan={loan}
                         refetch={refetch}
+                        setSelectedLoan={setSelectedLoan}
+                        setIsModalOpen={setIsModalOpen}
                       />
                     ))
                   ) : (
@@ -81,6 +93,9 @@ const PendingLoan = () => {
                   )}
                 </tbody>
               </table>
+              {isModalOpen && (
+                <ViewLoanModal loan={selectedLoan} closeModal={closeModal} />
+              )}
             </div>
           </div>
         </div>

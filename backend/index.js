@@ -213,9 +213,27 @@ async function run() {
     });
 
     //get all approved loan
-    app.get("/approve-loans", async (req, res) => {
+    app.get("/approved-loans", async (req, res) => {
       const result = await approveLoanCollection.find().toArray();
       res.send(result);
+    });
+
+    //delete approved loan
+    app.delete("/approved-loans/:id", async (req, res) => {
+      const id = req.params.id;
+      const deleted = await approveLoanCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send(deleted);
+    });
+
+    //view approved loan details
+    app.get("/approved-loans/:id", async (req, res) => {
+      const id = req.params.id;
+      const loan = await approveLoanCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      res.send(loan);
     });
 
     // Send a ping to confirm a successful connection

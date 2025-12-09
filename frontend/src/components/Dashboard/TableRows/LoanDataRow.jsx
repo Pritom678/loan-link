@@ -4,7 +4,7 @@ import { FaCheck, FaEye, FaTimes } from "react-icons/fa";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
 
-const LoanDataRow = ({ loan, refetch }) => {
+const LoanDataRow = ({ loan, refetch, setSelectedLoan, setIsModalOpen }) => {
   const axiosSecure = useAxiosSecure();
 
   const handleApprove = async () => {
@@ -30,9 +30,8 @@ const LoanDataRow = ({ loan, refetch }) => {
   const handleView = async () => {
     try {
       const res = await axiosSecure.get(`/apply-loans/${loan._id}`);
-      console.log(res.data); // open modal here
-      // setModalData(res.data);
-      // setIsModalOpen(true);
+      setSelectedLoan(res.data)
+      setIsModalOpen(true)
     } catch (err) {
       toast.error("Failed to load details", err);
     }
@@ -82,6 +81,7 @@ const LoanDataRow = ({ loan, refetch }) => {
           >
             <FaEye />
           </button>
+          
         </div>
       </td>
     </tr>
