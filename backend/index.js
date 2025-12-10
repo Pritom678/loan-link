@@ -103,9 +103,20 @@ async function run() {
     app.get("/loans", async (req, res) => {
       try {
         const limit = parseInt(req.query.limit) || 0;
-        let cursor = loanCollection.find();
+        let cursor = loanCollection.find({ availability: "available" });
         if (limit > 0) cursor = cursor.limit(limit);
         const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Something went wrong" });
+      }
+    });
+
+    // Get all loans (for admin dashboard / all loans page)
+    app.get("/loans/all", async (req, res) => {
+      try {
+        const result = await loanCollection.find().toArray(); // no availability filter
         res.send(result);
       } catch (error) {
         console.error(error);
@@ -191,6 +202,27 @@ async function run() {
         console.error(error);
         res.status(500).send({ message: "Failed to submit loan application" });
       }
+    });
+
+    // Toggle loan availability (show on home switch)
+    app.patch("/loans/toggle-availability/:id", async (req, res) => {
+      const id = req.params.id;
+      const { availability } = req.body;
+
+      if (!["available", "unavailable"].includes(availability)) {
+        return res.status(400).send({ message: "Invalid availability state" });
+      }
+
+      const result = await loanCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { availability } }
+      );
+
+      res.send({
+        success: true,
+        message: `Loan is now ${availability}`,
+        result,
+      });
     });
 
     // Get only Pending loans

@@ -16,11 +16,12 @@ import { createBrowserRouter } from "react-router";
 import AddLoan from "../pages/Dashboard/Manager/AddLoan";
 import AboutUs from "../pages/AboutUs/AboutUs";
 import ContactPage from "../pages/ContactPage/ContactPage";
-import AllLoans from "../pages/AllLoans/AllLoans";
+import AllLoansOptions from "../pages/AllLoans/AllLoansOptions";
 import ApplyForm from "../components/Form/ApplyForm";
 import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
 import PendingLoan from "../pages/Dashboard/Manager/PendingLoan";
 import ApprovedLoan from "../pages/Dashboard/Manager/ApprovedLoan";
+import AllLoans from "../pages/Dashboard/Admin/AllLoans";
 
 export const router = createBrowserRouter([
   {
@@ -45,8 +46,8 @@ export const router = createBrowserRouter([
         element: <ContactPage />,
       },
       {
-        path: "/all-loans",
-        element: <AllLoans />,
+        path: "/all-loans-options",
+        element: <AllLoansOptions />,
       },
       {
         path: "/apply-loans/:id",
@@ -101,6 +102,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ManageUsers />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "all-loan",
+        element: (
+          <PrivateRoute>
+            <AllLoans />
           </PrivateRoute>
         ),
       },

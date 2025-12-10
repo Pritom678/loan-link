@@ -6,15 +6,13 @@ import Container from "../../components/Shared/Container";
 import Card from "../../components/Home/Card";
 import { motion } from "framer-motion";
 
-const AllLoans = () => {
+const AllLoansOptions = () => {
   const axiosSecure = useAxiosSecure();
 
   const { data: loans = [], isLoading } = useQuery({
     queryKey: ["loans"],
     queryFn: async () => {
-      const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/loans`
-      );
+      const result = await axiosSecure(`${import.meta.env.VITE_API_URL}/loans`);
       return result.data;
     },
   });
@@ -65,4 +63,4 @@ const AllLoans = () => {
   );
 };
 
-export default AllLoans;
+export default AllLoansOptions;

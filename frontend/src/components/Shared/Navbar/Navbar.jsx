@@ -26,7 +26,7 @@ const Navbar = () => {
         <span className="absolute left-0 bottom-0 w-full h-full bg-primary/10 rounded-md scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100 -z-10"></span>
       </Link>
 
-      <Link to="/all-loans" className={linkClass("/all-loans")}>
+      <Link to="/all-loans-options" className={linkClass("/all-loans-options")}>
         All Loans
         <span className="absolute left-0 bottom-0 w-full h-full bg-primary/10 rounded-md scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100 -z-10"></span>
       </Link>
