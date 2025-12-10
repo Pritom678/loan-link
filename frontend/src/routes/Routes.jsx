@@ -22,6 +22,7 @@ import ManageLoans from "../pages/Dashboard/Manager/ManageLoans";
 import PendingLoan from "../pages/Dashboard/Manager/PendingLoan";
 import ApprovedLoan from "../pages/Dashboard/Manager/ApprovedLoan";
 import AllLoans from "../pages/Dashboard/Admin/AllLoans";
+import LoanApplication from "../pages/Dashboard/Admin/LoanApplication";
 
 export const router = createBrowserRouter([
   {
@@ -110,6 +111,14 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <AllLoans />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "all-loan-application",
+        element: (
+          <PrivateRoute>
+            <LoanApplication/>
           </PrivateRoute>
         ),
       },

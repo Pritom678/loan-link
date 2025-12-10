@@ -78,6 +78,7 @@ const ApplyForm = () => {
       const ApplyLoanData = {
         loanId: id,
         loanTitle: loanDetails?.title,
+        category: loanDetails?.category,
         interestRate: loanDetails?.interest,
         userEmail: user?.email,
         firstName,
@@ -128,6 +129,14 @@ const ApplyForm = () => {
             <input
               className="input input-bordered"
               value={loanDetails?.title || "Loading..."}
+              readOnly
+            />
+          </div>
+          <div className="form-control">
+            <label className="label">Category</label>
+            <input
+              className="input input-bordered"
+              value={loanDetails?.category || "Loading..."}
               readOnly
             />
           </div>

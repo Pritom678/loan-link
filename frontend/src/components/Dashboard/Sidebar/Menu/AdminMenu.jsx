@@ -6,6 +6,7 @@ const AdminMenu = () => {
     <>
       <MenuItem icon={FaUserCog} label='Manage Users' address='manage-users' />
       <MenuItem icon={FaUserCog} label='All Loans' address='all-loan' />
+      <MenuItem icon={FaUserCog} label='Loan Applications' address='all-loan-application' />
     </>
   )
 }

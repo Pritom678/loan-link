@@ -233,7 +233,7 @@ async function run() {
       res.send(result);
     });
 
-    //get all loan data for Borrower
+    //get all loan data for Borrower using email
     app.get("/apply-loans/user/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
 
@@ -301,25 +301,6 @@ async function run() {
       }
     });
 
-    //delete loan
-
-    // app.delete("/apply-loans/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const deleted = await loanApplicationCollection.deleteOne({
-    //     _id: new ObjectId(id),
-    //   });
-
-    //   if (loan) {
-    //     await usersCollection.updateOne(
-    //       { email: loan.userEmail },
-    //       { $inc: { totalPending: -1 } }
-    //     );
-    //   }
-
-    //   res.send(deleted);
-    // });
-
-    //handle delete
     // DELETE a loan application
     app.delete("/apply-loans/:id", async (req, res) => {
       const { id } = req.params;
@@ -360,6 +341,11 @@ async function run() {
       }
     });
 
+    //get all loan applications
+    app.get("/apply-loans", async (req, res) => {
+      const result = await loanApplicationCollection.find().toArray();
+      res.send(result);
+    });
     //get all approved loan
     app.get("/approved-loans", async (req, res) => {
       const result = await approveLoanCollection.find().toArray();
