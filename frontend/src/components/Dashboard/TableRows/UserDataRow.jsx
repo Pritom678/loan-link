@@ -1,41 +1,70 @@
-import { useState } from 'react'
-import UpdateUserRoleModal from '../../Modal/UpdateUserRoleModal'
+import { useState } from "react";
+import UpdateUserRoleModal from "../../Modal/UpdateUserRoleModal";
+import SuspendModal from "../../Modal/SuspendModal";
 
-const UserDataRow = () => {
-  let [isOpen, setIsOpen] = useState(false)
-  const closeModal = () => setIsOpen(false)
+const UserDataRow = ({ user, refetch }) => {
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
+
   return (
     <tr>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 '>abc@gmail.com</p>
-      </td>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className='text-gray-900 '>Customer</p>
-      </td>
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
-        <p className=''>Unavailable</p>
+      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+        <p className="text-gray-900 ">{user.name}</p>
       </td>
 
-      <td className='px-5 py-5 border-b border-gray-200 bg-white text-sm'>
+      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+        <p className="text-gray-900 ">{user.email}</p>
+      </td>
+
+      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+        <p className="">{user.role}</p>
+      </td>
+
+      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+        {/* Update Role Button */}
         <span
-          onClick={() => setIsOpen(true)}
-          className='relative cursor-pointer inline-block px-3 py-1 font-semibold text-green-900 leading-tight'
+          onClick={() => setIsRoleModalOpen(true)}
+          className="relative cursor-pointer inline-block px-3 py-1 font-semibold text-green-900 leading-tight mr-3"
         >
-          <span
-            aria-hidden='true'
-            className='absolute inset-0 bg-green-200 opacity-50 rounded-full'
-          ></span>
-          <span className='relative'>Update Role</span>
+          <span className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
+          <span className="relative">Update Role</span>
         </span>
-        {/* Modal */}
+
+        {/* Suspend Button */}
+        
+        {user?.status === "suspended" ? (
+          <span className="relative inline-block px-3 py-1 font-semibold text-red-700 leading-tight">
+            <span className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
+            <span className="relative">Suspended</span>
+          </span>
+        ) : (
+          <span
+            onClick={() => setIsSuspendModalOpen(true)}
+            className="relative cursor-pointer inline-block px-3 py-1 font-semibold text-red-900 leading-tight"
+          >
+            <span className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
+            <span className="relative">Suspend</span>
+          </span>
+        )}
+
+        {/* Role Modal */}
         <UpdateUserRoleModal
-          isOpen={isOpen}
-          closeModal={closeModal}
-          role='customer'
+          isOpen={isRoleModalOpen}
+          closeModal={() => setIsRoleModalOpen(false)}
+          user={user}
+          refetch={refetch}
+        />
+
+        {/* Suspend Modal */}
+        <SuspendModal
+          isOpen={isSuspendModalOpen}
+          closeModal={() => setIsSuspendModalOpen(false)}
+          user={user}
+          refetch={refetch}
         />
       </td>
     </tr>
-  )
-}
+  );
+};
 
-export default UserDataRow
+export default UserDataRow;

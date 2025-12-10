@@ -393,6 +393,46 @@ async function run() {
       res.send(user);
     });
 
+    //get all user info
+    app.get("/user", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/user/suspend/:id", async (req, res) => {
+      const id = req.params.id;
+      const { reason, feedback, suspendedAt } = req.body;
+
+      const result = await usersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            status: "suspended",
+            suspensionReason: reason,
+            adminFeedback: feedback,
+            suspendedAt,
+          },
+        }
+      );
+
+      res.send(result);
+    });
+
+    // update user role
+    app.patch("/user/role/:id", async (req, res) => {
+      const id = req.params.id;
+      const { role } = req.body;
+
+      if (!role) return res.status(400).send({ message: "Role is required" });
+
+      const result = await usersCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: { role } }
+      );
+
+      res.send({ success: true, message: "Role updated", result });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(

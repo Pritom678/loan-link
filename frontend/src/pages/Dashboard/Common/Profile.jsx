@@ -13,6 +13,7 @@ const Profile = () => {
     enabled: !!user?.email,
     queryFn: async () => {
       const res = await axiosSecure.get(`/user/${user?.email}`);
+      console.log("User Info:", res.data);
       return res.data;
     },
   });
