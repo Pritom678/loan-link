@@ -8,6 +8,7 @@ import coverImg from "../../../assets/images/cover.jpg";
 const Profile = () => {
   const { user, logOut } = useAuth();
   const [role, isRoleLoading] = useRole();
+  console.log(role);
   const axiosSecure = useAxiosSecure();
 
   const { data: userInfo = {} } = useQuery({

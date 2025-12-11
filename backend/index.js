@@ -156,8 +156,8 @@ async function run() {
       }
     });
 
-    // Get all loans (for admin dashboard / all loans page)
-    app.get("/loans/all", async (req, res) => {
+    // get all loans (for admin dashboard / all loans page)
+    app.get("/loans/all", verifyJWT, verifyADMIN, async (req, res) => {
       try {
         const result = await loanCollection.find().toArray(); // no availability filter
         res.send(result);
@@ -175,7 +175,7 @@ async function run() {
     });
 
     // update loan option
-    app.put("/loans/:id", async (req, res) => {
+    app.put("/loans/:id", verifyJWT, verifyADMIN, async (req, res) => {
       try {
         const id = req.params.id;
         const updateLoanData = req.body;
@@ -206,7 +206,7 @@ async function run() {
     });
 
     //delete loan option
-    app.delete("/loans/:id", async (req, res) => {
+    app.delete("/loans/:id", verifyJWT, verifyADMIN, async (req, res) => {
       const { id } = req.params;
 
       try {
@@ -224,7 +224,7 @@ async function run() {
     });
 
     //post loan application
-    app.post("/apply-loans", async (req, res) => {
+    app.post("/apply-loans", verifyJWT, async (req, res) => {
       try {
         const applyLoanData = {
           ...req.body,
@@ -248,28 +248,35 @@ async function run() {
     });
 
     // Toggle loan availability (show on home switch)
-    app.patch("/loans/toggle-availability/:id", async (req, res) => {
-      const id = req.params.id;
-      const { availability } = req.body;
+    app.patch(
+      "/loans/toggle-availability/:id",
+      verifyJWT,
+      verifyADMIN,
+      async (req, res) => {
+        const id = req.params.id;
+        const { availability } = req.body;
 
-      if (!["available", "unavailable"].includes(availability)) {
-        return res.status(400).send({ message: "Invalid availability state" });
+        if (!["available", "unavailable"].includes(availability)) {
+          return res
+            .status(400)
+            .send({ message: "Invalid availability state" });
+        }
+
+        const result = await loanCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { availability } }
+        );
+
+        res.send({
+          success: true,
+          message: `Loan is now ${availability}`,
+          result,
+        });
       }
-
-      const result = await loanCollection.updateOne(
-        { _id: new ObjectId(id) },
-        { $set: { availability } }
-      );
-
-      res.send({
-        success: true,
-        message: `Loan is now ${availability}`,
-        result,
-      });
-    });
+    );
 
     // Get only Pending loans
-    app.get("/pending-loans", async (req, res) => {
+    app.get("/pending-loans", verifyJWT, verifyManager, async (req, res) => {
       const result = await loanApplicationCollection
         .find({ status: "Pending" })
         .toArray();
@@ -291,7 +298,7 @@ async function run() {
     });
 
     //view loan details
-    app.get("/apply-loans/:id", async (req, res) => {
+    app.get("/apply-loans/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const loan = await loanApplicationCollection.findOne({
         _id: new ObjectId(id),
@@ -300,82 +307,87 @@ async function run() {
     });
 
     //approved and reject loan
-    app.patch("/apply-loans/:id", async (req, res) => {
-      const id = req.params.id;
+    app.patch(
+      "/apply-loans/:id",
+      verifyJWT,
+      verifyManager,
+      async (req, res) => {
+        const id = req.params.id;
 
-      const { status } = req.body || {};
-      if (!status) {
-        return res.status(400).send({ message: "Status is required" });
+        const { status } = req.body || {};
+        if (!status) {
+          return res.status(400).send({ message: "Status is required" });
+        }
+        const query = { _id: new ObjectId(id) };
+
+        try {
+          const loan = await loanApplicationCollection.findOne(query);
+          if (!loan) {
+            return res.status(404).send({ message: "Loan not found" });
+          }
+
+          // Update common field
+          const updateFields = {
+            status,
+          };
+
+          // Handle approved
+          if (status === "Approved") {
+            updateFields.approvedAt = new Date().toISOString();
+
+            await approveLoanCollection.insertOne({
+              ...loan,
+              ...updateFields,
+            });
+
+            await usersCollection.updateOne(
+              { email: loan.userEmail },
+              {
+                $inc: { totalPending: -1, totalApproved: 1 },
+              }
+            );
+
+            await loanApplicationCollection.updateOne(query, {
+              $set: updateFields,
+            });
+
+            return res.send({
+              success: true,
+              message: "Loan approved successfully",
+            });
+          }
+
+          // Handle rejected
+          if (status === "Rejected") {
+            updateFields.rejectedAt = new Date().toISOString();
+
+            await usersCollection.updateOne(
+              { email: loan.userEmail },
+              {
+                $inc: { totalPending: -1, totalRejected: 1 },
+              }
+            );
+
+            await loanApplicationCollection.updateOne(query, {
+              $set: updateFields,
+            });
+
+            return res.send({
+              success: true,
+              message: "Loan rejected successfully",
+            });
+          }
+
+          res.status(400).send({ message: "Invalid status value" });
+        } catch (error) {
+          console.error(error);
+          res.status(500).send({ message: "An error occurred", error });
+        }
       }
-      const query = { _id: new ObjectId(id) };
-
-      try {
-        const loan = await loanApplicationCollection.findOne(query);
-        if (!loan) {
-          return res.status(404).send({ message: "Loan not found" });
-        }
-
-        // Update common field
-        const updateFields = {
-          status,
-        };
-
-        // Handle approved
-        if (status === "Approved") {
-          updateFields.approvedAt = new Date().toISOString();
-
-          await approveLoanCollection.insertOne({
-            ...loan,
-            ...updateFields,
-          });
-
-          await usersCollection.updateOne(
-            { email: loan.userEmail },
-            {
-              $inc: { totalPending: -1, totalApproved: 1 },
-            }
-          );
-
-          await loanApplicationCollection.updateOne(query, {
-            $set: updateFields,
-          });
-
-          return res.send({
-            success: true,
-            message: "Loan approved successfully",
-          });
-        }
-
-        // Handle rejected
-        if (status === "Rejected") {
-          updateFields.rejectedAt = new Date().toISOString();
-
-          await usersCollection.updateOne(
-            { email: loan.userEmail },
-            {
-              $inc: { totalPending: -1, totalRejected: 1 },
-            }
-          );
-
-          await loanApplicationCollection.updateOne(query, {
-            $set: updateFields,
-          });
-
-          return res.send({
-            success: true,
-            message: "Loan rejected successfully",
-          });
-        }
-
-        res.status(400).send({ message: "Invalid status value" });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "An error occurred", error });
-      }
-    });
+    );
 
     // DELETE a loan application
-    app.delete("/apply-loans/:id", async (req, res) => {
+    app.delete("/apply-loans/:id", verifyJWT, async (req, res) => {
       const { id } = req.params;
 
       try {
@@ -415,39 +427,121 @@ async function run() {
     });
 
     //get all loan applications
-    app.get("/apply-loans", async (req, res) => {
+    app.get("/apply-loans", verifyJWT, verifyADMIN, async (req, res) => {
       const result = await loanApplicationCollection.find().toArray();
       res.send(result);
     });
     //get all approved loan
-    app.get("/approved-loans", async (req, res) => {
+    app.get("/approved-loans", verifyJWT, verifyManager, async (req, res) => {
       const result = await approveLoanCollection.find().toArray();
       res.send(result);
     });
 
     //delete approved loan
-    app.delete("/approved-loans/:id", async (req, res) => {
-      const id = req.params.id;
-      const deleted = await approveLoanCollection.deleteOne({
-        _id: new ObjectId(id),
+    app.delete(
+      "/approved-loans/:id",
+      verifyJWT,
+      verifyManager,
+      async (req, res) => {
+        const id = req.params.id;
+        const deleted = await approveLoanCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        res.send(deleted);
+      }
+    );
+
+    //get admin stats
+    app.get("/admin-stats", async (req, res) => {
+      const totalLoans = await loanCollection.countDocuments();
+      const approvedLoans = await loanCollection.countDocuments({
+        status: "approved",
       });
-      res.send(deleted);
+      const rejectedLoans = await loanCollection.countDocuments({
+        status: "rejected",
+      });
+      const totalUsers = await usersCollection.countDocuments();
+
+      res.send({
+        totalLoans,
+        approvedLoans,
+        rejectedLoans,
+        totalUsers,
+      });
+    });
+
+    //get manager stats
+    app.get("/manager-stats", async (req, res) => {
+      const managerEmail = req.query.email; // from frontend
+
+      const loansAdded = await loanCollection.countDocuments({
+        "manager.email": managerEmail,
+      });
+
+      const approved = await loanCollection.countDocuments({
+        "manager.email": managerEmail,
+        status: "approved",
+      });
+
+      const pending = await loanCollection.countDocuments({
+        "manager.email": managerEmail,
+        status: "pending",
+      });
+
+      res.send({
+        loansAdded,
+        approved,
+        pending,
+      });
+    });
+
+    //borrower stats
+    app.get("/borrower-stats", async (req, res) => {
+      const email = req.query.email;
+
+      const totalApplied = await loanApplicationCollection.countDocuments({
+        userEmail: email,
+      });
+
+      const approved = await loanApplicationCollection.countDocuments({
+        userEmail: email,
+        status: "Approved",
+      });
+
+      const rejected = await loanApplicationCollection.countDocuments({
+        userEmail: email,
+        status: "Rejected",
+      });
+
+      res.send({
+        totalApplied,
+        approved,
+        rejected,
+      });
     });
 
     //view approved loan details
-    app.get("/approved-loans/:id", async (req, res) => {
-      const id = req.params.id;
-      const loan = await approveLoanCollection.findOne({
-        _id: new ObjectId(id),
-      });
-      res.send(loan);
-    });
+    app.get(
+      "/approved-loans/:id",
+      verifyJWT,
+      verifyManager,
+      async (req, res) => {
+        const id = req.params.id;
+        const loan = await approveLoanCollection.findOne({
+          _id: new ObjectId(id),
+        });
+        res.send(loan);
+      }
+    );
 
     //save and update user
     app.post("/user", async (req, res) => {
       const userData = req.body;
+      const lowerEmail = userData.email.toLowerCase();
+      userData.email = lowerEmail;
+      console.log(userData);
 
-      const query = { email: userData.email };
+      const query = { email: lowerEmail };
       const alreadyExists = await usersCollection.findOne(query);
 
       if (alreadyExists) {
@@ -479,7 +573,9 @@ async function run() {
 
     //get a users role
     app.get("/user/role", verifyJWT, async (req, res) => {
+      console.log(req.tokenEmail);
       const result = await usersCollection.findOne({ email: req.tokenEmail });
+      // console.log(result);
       res.send({ role: result?.role });
     });
 
@@ -491,12 +587,12 @@ async function run() {
     });
 
     //get all user info
-    app.get("/user", async (req, res) => {
+    app.get("/user", verifyJWT, verifyADMIN, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
-    app.patch("/user/suspend/:id", async (req, res) => {
+    app.patch("/user/suspend/:id", verifyJWT, verifyADMIN, async (req, res) => {
       const id = req.params.id;
       const { reason, feedback, suspendedAt } = req.body;
 
@@ -515,10 +611,8 @@ async function run() {
       res.send(result);
     });
 
-    
-
     // update user role
-    app.patch("/user/role/:id", async (req, res) => {
+    app.patch("/user/role/:id", verifyJWT, verifyADMIN, async (req, res) => {
       const id = req.params.id;
       const { role } = req.body;
 
