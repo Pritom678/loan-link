@@ -60,6 +60,31 @@ async function run() {
     const approveLoanCollection = db.collection("approved_loan");
     const usersCollection = db.collection("users");
 
+    //role middlewares
+    const verifyADMIN = async (req, res, next) => {
+      const email = req.tokenEmail;
+      const user = await usersCollection.findOne({ email });
+
+      if (user?.role !== "admin")
+        return res
+          .status(403)
+          .send({ message: "Admin only Actions", role: user?.role });
+
+      next();
+    };
+    const verifyManager = async (req, res, next) => {
+      const email = req.tokenEmail;
+      const user = await usersCollection.findOne({ email });
+
+      if (user?.role !== "manager")
+        return res
+          .status(403)
+          .send({ message: "Seller only Actions", role: user?.role });
+
+      next();
+    };
+
+
     // Create a Checkout session
     app.post("/create-checkout-session", async (req, res) => {
       const { loanId, customerEmail } = req.body;
