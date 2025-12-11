@@ -29,6 +29,7 @@ app.use(
 );
 
 // app.use(cors());
+
 app.use(express.json());
 
 // jwt middlewares
@@ -107,7 +108,7 @@ async function run() {
           mode: "payment",
           metadata: { loanId },
           // Redirect after payment
-          success_url: `${process.env.CLIENT_URL}/dashboard/payment-success?loanId=${loanId}`,
+          success_url: `${process.env.CLIENT_URL}/dashboard/payment-success?loanId=${loanId}&session_id={CHECKOUT_SESSION_ID}`,
           cancel_url: `${process.env.CLIENT_URL}/dashboard/payment-cancel?loanId=${loanId}`,
         });
 
@@ -119,21 +120,49 @@ async function run() {
     });
 
     app.patch("/apply-loans/:id/pay-fee", async (req, res) => {
-      const id = req.params.id;
+      const { paymentId } = req.body;
+      const loanId = req.params.id;
+
+      if (!paymentId)
+        return res.status(400).send({ message: "paymentId required" });
 
       try {
-        await loanApplicationCollection.updateOne(
-          { _id: new ObjectId(id) },
-          { $set: { applicationStatus: "Paid" } }
+        const result = await loanApplicationCollection.updateOne(
+          { _id: new ObjectId(loanId) },
+          {
+            $set: {
+              applicationStatus: "Paid",
+              paymentId,
+              paidAt: new Date().toISOString(),
+            },
+          }
         );
-        res.send({ success: true, message: "Loan fee marked as paid" });
+
+        if (result.matchedCount === 0)
+          return res.status(404).send({ message: "Loan not found" });
+
+        res.send({ success: true, message: "Payment recorded" });
       } catch (err) {
         console.error(err);
-        res
-          .status(500)
-          .send({ success: false, message: "Failed to update fee" });
+        res.status(500).send({ message: "Failed to update loan", err });
       }
     });
+
+    //retrieve payment details
+    app.get("/payment-details/:sessionId", async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
+
+    if (!session.payment_intent) {
+      return res.status(400).send({ message: "Payment not completed yet" });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
+    res.send(paymentIntent);
+  } catch (error) {
+    res.status(400).send({ message: error.message });
+  }
+});
 
     //save loan option in db
     app.post("/loans", async (req, res) => {

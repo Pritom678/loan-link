@@ -6,19 +6,23 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import DeleteModal from "../../../components/Modal/DeleteModal";
 import ViewMyLoanModal from "../../../components/Modal/ViewMyLoanModal";
 import PayModal from "../../../components/Modal/PayModal";
-import PaymentModal from "../../../components/Modal/PaymentModal"; // import your modal
+import PaymentModal from "../../../components/Modal/PaymentModal";
+import PaymentDetailModal from "../../../components/Modal/PaymentDetailModal";
 
 const MyLoans = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isPayOpen, setIsPayOpen] = useState(false);
 
-  // Payment status modal state
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState("");
+
+  const [paymentDetailModalOpen, setPaymentDetailModalOpen] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
 
   const { data: userLoans = [], refetch } = useQuery({
     queryKey: ["userLoans", user?.email],
@@ -29,27 +33,34 @@ const MyLoans = () => {
     },
   });
 
-  // Check for success/canceled payment in URL
+  // Handle Stripe success redirect
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
     const loanId = params.get("loanId");
-    const success = params.get("success");
 
-    if (loanId) {
-      if (success === "true") {
-        // Update backend about paid fee
-        axiosSecure
-          .patch(`/apply-loans/${loanId}/pay-fee`)
-          .then(() => {
-            setPaymentMessage("Loan fee paid successfully!");
-            refetch();
-          })
-          .catch(() => setPaymentMessage("Failed to update loan fee status"))
-          .finally(() => setPaymentModalOpen(true));
-      } else if (success === "false") {
-        setPaymentMessage("Payment canceled!");
-        setPaymentModalOpen(true);
-      }
+    if (sessionId && loanId) {
+      // Step 1: Retrieve checkout session
+      axiosSecure
+        .get(`/payment-details/${sessionId}`)
+        .then(({ data }) => {
+          const paymentId = data.id; // Stripe PaymentIntent ID
+
+          // Step 2: Save paymentId in backend
+          return axiosSecure.patch(`/apply-loans/${loanId}/pay-fee`, {
+            paymentId,
+          });
+        })
+        .then(() => {
+          setPaymentMessage("Loan fee paid successfully!");
+          setPaymentModalOpen(true);
+          refetch();
+        })
+        .catch((err) => {
+          console.error(err);
+          setPaymentMessage("Failed to record payment");
+          setPaymentModalOpen(true);
+        });
     }
   }, [axiosSecure, refetch]);
 
@@ -80,6 +91,18 @@ const MyLoans = () => {
     setIsPayOpen(true);
   };
 
+  const handleViewPayment = async (paymentId) => {
+    if (!paymentId) return;
+    setPaymentDetailModalOpen(true);
+    setPaymentData(null); // loading state
+    try {
+      const { data } = await axiosSecure.get(`/payment-details/${paymentId}`);
+      setPaymentData(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <>
       <div className="container mx-auto px-4 sm:px-8">
@@ -104,6 +127,7 @@ const MyLoans = () => {
                       onView={() => openViewModal(loan)}
                       onCancel={() => openCancelModal(loan)}
                       onPay={() => openPayModal(loan)}
+                      onViewPayment={() => handleViewPayment(loan.paymentId)}
                     />
                   ))}
                 </tbody>
@@ -135,11 +159,16 @@ const MyLoans = () => {
         </>
       )}
 
-      {/* Payment status modal */}
       <PaymentModal
         isOpen={paymentModalOpen}
         message={paymentMessage}
         onClose={() => setPaymentModalOpen(false)}
+      />
+
+      <PaymentDetailModal
+        isOpen={paymentDetailModalOpen}
+        onClose={() => setPaymentDetailModalOpen(false)}
+        paymentData={paymentData}
       />
     </>
   );
