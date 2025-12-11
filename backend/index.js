@@ -62,31 +62,50 @@ async function run() {
 
     // Create a Checkout session
     app.post("/create-checkout-session", async (req, res) => {
-      const paymentInfo = req.body;
+      const { loanId, customerEmail } = req.body;
 
-      const session = await stripe.checkout.sessions.create({
-        line_items: [
-          {
-            price_data: {
-              currency: "usd",
-              product_data: {
-                title: paymentInfo.title,
+      try {
+        const session = await stripe.checkout.sessions.create({
+          line_items: [
+            {
+              price_data: {
+                currency: "usd",
+                product_data: { name: "Loan Application Fee" },
+                unit_amount: 10 * 100,
               },
-              unit_amount: paymentInfo?.price * 100,
+              quantity: 1,
             },
-            quantity: paymentInfo?.quantity,
-          },
-        ],
-        customer_email: paymentInfo?.customerEmail,
-        mode: "payment",
-        metadata: {
-          loanId: paymentInfo?.loanId,
-          customer: paymentInfo?.customerEmail,
-        },
-        success_url: `${process.env.CLIENT_URL}/my-loans?success=true&loanId=${paymentInfo?.loanId}`,
-        cancel_url: `${process.env.CLIENT_URL}/my-loans?canceled=true`,
-      });
-      res.send({ url: session.url });
+          ],
+          customer_email: customerEmail,
+          mode: "payment",
+          metadata: { loanId },
+          // Redirect after payment
+          success_url: `${process.env.CLIENT_URL}/dashboard/payment-success?loanId=${loanId}`,
+          cancel_url: `${process.env.CLIENT_URL}/dashboard/payment-cancel?loanId=${loanId}`,
+        });
+
+        res.send({ url: session.url });
+      } catch (err) {
+        console.error(err);
+        res.status(500).send({ error: "Stripe session failed" });
+      }
+    });
+
+    app.patch("/apply-loans/:id/pay-fee", async (req, res) => {
+      const id = req.params.id;
+
+      try {
+        await loanApplicationCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { applicationStatus: "Paid" } }
+        );
+        res.send({ success: true, message: "Loan fee marked as paid" });
+      } catch (err) {
+        console.error(err);
+        res
+          .status(500)
+          .send({ success: false, message: "Failed to update fee" });
+      }
     });
 
     //save loan option in db
@@ -256,9 +275,14 @@ async function run() {
       res.send(loan);
     });
 
-    //approved loan
+    //approved and reject loan
     app.patch("/apply-loans/:id", async (req, res) => {
       const id = req.params.id;
+
+      const { status } = req.body || {};
+      if (!status) {
+        return res.status(400).send({ message: "Status is required" });
+      }
       const query = { _id: new ObjectId(id) };
 
       try {
@@ -267,34 +291,59 @@ async function run() {
           return res.status(404).send({ message: "Loan not found" });
         }
 
-        const approvedData = {
-          ...loan,
-          status: "Approved",
-          approvedAt: new Date().toISOString(),
+        // Update common field
+        const updateFields = {
+          status,
         };
 
-        // Update in the main loan application collection
-        await loanApplicationCollection.updateOne(query, {
-          $set: {
-            status: "Approved",
-          },
-        });
+        // Handle approved
+        if (status === "Approved") {
+          updateFields.approvedAt = new Date().toISOString();
 
-        // Insert into approved loans collection
-        await approveLoanCollection.insertOne(approvedData);
+          await approveLoanCollection.insertOne({
+            ...loan,
+            ...updateFields,
+          });
 
-        // Update user stats
-        await usersCollection.updateOne(
-          { email: loan.userEmail },
-          {
-            $inc: { totalPending: -1, totalApproved: 1 },
-          }
-        );
+          await usersCollection.updateOne(
+            { email: loan.userEmail },
+            {
+              $inc: { totalPending: -1, totalApproved: 1 },
+            }
+          );
 
-        res.send({
-          success: true,
-          message: "Loan approved successfully",
-        });
+          await loanApplicationCollection.updateOne(query, {
+            $set: updateFields,
+          });
+
+          return res.send({
+            success: true,
+            message: "Loan approved successfully",
+          });
+        }
+
+        // Handle rejected
+        if (status === "Rejected") {
+          updateFields.rejectedAt = new Date().toISOString();
+
+          await usersCollection.updateOne(
+            { email: loan.userEmail },
+            {
+              $inc: { totalPending: -1, totalRejected: 1 },
+            }
+          );
+
+          await loanApplicationCollection.updateOne(query, {
+            $set: updateFields,
+          });
+
+          return res.send({
+            success: true,
+            message: "Loan rejected successfully",
+          });
+        }
+
+        res.status(400).send({ message: "Invalid status value" });
       } catch (error) {
         console.error(error);
         res.status(500).send({ message: "An error occurred", error });

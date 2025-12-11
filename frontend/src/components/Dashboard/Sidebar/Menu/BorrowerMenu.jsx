@@ -1,11 +1,12 @@
-import { BsFingerprint } from "react-icons/bs";
+
 
 import MenuItem from "./MenuItem";
+import { FaMoneyBillWave } from "react-icons/fa";
 
 const BorrowerMenu = () => {
   return (
     <>
-      <MenuItem icon={BsFingerprint} label="My Loans" address="my-loans" />
+      <MenuItem icon={FaMoneyBillWave} label="My Loans" address="my-loans" />
     </>
   );
 };

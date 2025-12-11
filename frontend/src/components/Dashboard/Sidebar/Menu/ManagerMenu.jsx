@@ -1,22 +1,23 @@
-import { BsFillHouseAddFill } from "react-icons/bs";
-import { MdHomeWork, MdOutlineManageHistory } from "react-icons/md";
+import { MdAddCard, MdManageAccounts } from "react-icons/md";
 import MenuItem from "./MenuItem";
+import { BsFillPatchCheckFill } from "react-icons/bs";
+import { AiOutlineClockCircle } from "react-icons/ai";
 const ManagerMenu = () => {
   return (
     <>
-      <MenuItem icon={BsFillHouseAddFill} label="Add Loan" address="add-loan" />
+      <MenuItem icon={MdAddCard} label="Add Loan" address="add-loan" />
       <MenuItem
-        icon={MdHomeWork}
+        icon={AiOutlineClockCircle}
         label="Pending Loan Application"
         address="pending-loans"
       />
       <MenuItem
-        icon={MdHomeWork}
+        icon={BsFillPatchCheckFill}
         label="Approved Loan Application"
         address="approved-loans"
       />
       <MenuItem
-        icon={MdOutlineManageHistory}
+        icon={MdManageAccounts }
         label="Manage Loans"
         address="manage-loans "
       />

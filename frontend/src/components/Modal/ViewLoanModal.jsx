@@ -12,7 +12,7 @@ const ViewLoanModal = ({ loan, closeModal }) => {
 
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h3 className="font-bold text-xl text-primary">Loan Application</h3>
+          <h3 className="font-bold text-xl text-primary">Pending Loan Application</h3>
           <button
             className="btn btn-sm btn-circle btn-error text-white"
             onClick={closeModal}

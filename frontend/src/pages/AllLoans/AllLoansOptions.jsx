@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import LoadingSpinner from "../../components/Shared/LoadingSpinner";
 import Container from "../../components/Shared/Container";
@@ -17,7 +17,22 @@ const AllLoansOptions = () => {
     },
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const loansPerPage = 6;
+
   if (isLoading) return <LoadingSpinner />;
+
+  // Pagination logic
+  const indexOfLastLoan = currentPage * loansPerPage;
+  const indexOfFirstLoan = indexOfLastLoan - loansPerPage;
+  const currentLoans = loans.slice(indexOfFirstLoan, indexOfLastLoan);
+
+  const totalPages = Math.ceil(loans.length / loansPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: "smooth" }); // scroll to top on page change
+  };
 
   return (
     <Container>
@@ -35,14 +50,14 @@ const AllLoansOptions = () => {
       </div>
 
       {/* Loan Cards */}
-      {loans && loans.length > 0 ? (
+      {currentLoans && currentLoans.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="pt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"
         >
-          {loans.map((loan, index) => (
+          {currentLoans.map((loan, index) => (
             <motion.div
               key={loan._id}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -57,6 +72,25 @@ const AllLoansOptions = () => {
       ) : (
         <div className="text-center text-gray-500 py-20">
           No loan options available right now. Please check back later.
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 my-10 flex-wrap">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => handlePageChange(i + 1)}
+              className={`px-4 py-2 rounded-md border ${
+                currentPage === i + 1
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-300"
+              } hover:bg-primary hover:text-white transition`}
+            >
+              {i + 1}
+            </button>
+          ))}
         </div>
       )}
     </Container>

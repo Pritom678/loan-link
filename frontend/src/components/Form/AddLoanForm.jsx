@@ -19,10 +19,7 @@ const AddLoanForm = () => {
     reset: mutationReset,
   } = useMutation({
     mutationFn: async (payload) => {
-      await axiosSecure.post(
-        `${import.meta.env.VITE_API_URL}/loans`,
-        payload
-      );
+      await axiosSecure.post(`${import.meta.env.VITE_API_URL}/loans`, payload);
     },
     onSuccess: (data) => {
       console.log(data);
@@ -229,7 +226,10 @@ const AddLoanForm = () => {
                   placeholder="e.g. 500000"
                   {...register("limit", {
                     required: "Limit is required",
-                    max: { value: 50000000, message: "Max Limit is 50 Million" },
+                    max: {
+                      value: 50000000,
+                      message: "Max Limit is 50 Million",
+                    },
                   })}
                 />
                 {errors.limit && (
@@ -245,13 +245,21 @@ const AddLoanForm = () => {
               <label htmlFor="emiPlans" className="block text-gray-600">
                 EMI Plans
               </label>
-              <input
-                className="w-full px-4 py-3 border border-accent rounded-md focus:outline-secondary"
+              <select
                 id="emiPlans"
-                type="text"
-                placeholder="e.g. 6 Months, 12 Months, 24 Months"
                 {...register("emi", { required: "EMI is required" })}
-              />
+                className="w-full px-4 py-3 border border-accent rounded-md focus:outline-secondary"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Select EMI Plan
+                </option>
+                <option value="6 Months">6 Months</option>
+                <option value="12 Months">12 Months</option>
+                <option value="24 Months">24 Months</option>
+                <option value="36 Months">36 Months</option>
+                <option value="Custom">Custom</option>
+              </select>
               {errors.emi && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.emi.message}
@@ -300,7 +308,7 @@ const AddLoanForm = () => {
               className="w-full mt-5 p-3 font-medium text-white bg-primary hover:bg-secondary rounded-md shadow-md transition"
             >
               {isPending ? (
-                <TbCoin  className="animate-spin m-auto" />
+                <TbCoin className="animate-spin m-auto" />
               ) : (
                 "Save & Continue"
               )}

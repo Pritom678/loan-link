@@ -23,6 +23,8 @@ import PendingLoan from "../pages/Dashboard/Manager/PendingLoan";
 import ApprovedLoan from "../pages/Dashboard/Manager/ApprovedLoan";
 import AllLoans from "../pages/Dashboard/Admin/AllLoans";
 import LoanApplication from "../pages/Dashboard/Admin/LoanApplication";
+import PaymentSuccess from "../pages/Stripe/PaymentSucess";
+import PaymentCancel from "../pages/Stripe/PaymentCancel";
 
 export const router = createBrowserRouter([
   {
@@ -118,7 +120,7 @@ export const router = createBrowserRouter([
         path: "all-loan-application",
         element: (
           <PrivateRoute>
-            <LoanApplication/>
+            <LoanApplication />
           </PrivateRoute>
         ),
       },
@@ -137,6 +139,14 @@ export const router = createBrowserRouter([
             <MyLoans />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "payment-success",
+        element: <PaymentSuccess />,
+      },
+      {
+        path: "payment-cancel",
+        element: <PaymentCancel />,
       },
       {
         path: "manage-loans ",

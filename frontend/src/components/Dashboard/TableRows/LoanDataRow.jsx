@@ -8,24 +8,26 @@ const LoanDataRow = ({ loan, refetch, setSelectedLoan, setIsModalOpen }) => {
   const axiosSecure = useAxiosSecure();
 
   const handleApprove = async () => {
-    try {
-      await axiosSecure.patch(`/apply-loans/${loan._id}`);
-      toast.success("Loan Approved!");
-      refetch();
-    } catch (err) {
-      toast.error("Approval failed", err);
-    }
-  };
+  try {
+    await axiosSecure.patch(`/apply-loans/${loan._id}`, { status: "Approved" });
+    toast.success("Loan Approved!");
+    refetch();
+  } catch (err) {
+    toast.error("Approval failed", err);
+  }
+};
 
-  const handleReject = async () => {
-    try {
-      await axiosSecure.delete(`/apply-loans/${loan._id}`);
-      toast.success("Loan Rejected!");
-      refetch();
-    } catch (err) {
-      toast.error("Delete failed", err);
-    }
-  };
+const handleReject = async () => {
+  try {
+    await axiosSecure.patch(`/apply-loans/${loan._id}`, { status: "Rejected" });
+    toast.success("Loan Rejected!");
+    refetch();
+  } catch (err) {
+    toast.error("Failed to reject loan");
+  }
+};
+
+
 
   const handleView = async () => {
     try {

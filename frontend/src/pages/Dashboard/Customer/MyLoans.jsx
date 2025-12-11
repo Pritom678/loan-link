@@ -1,21 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import BorrowerLoanDataRow from "../../../components/Dashboard/TableRows/BorrowerLoanDataRow";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import DeleteModal from "../../../components/Modal/DeleteModal";
 import ViewMyLoanModal from "../../../components/Modal/ViewMyLoanModal";
-import toast from "react-hot-toast";
 import PayModal from "../../../components/Modal/PayModal";
+import PaymentModal from "../../../components/Modal/PaymentModal"; // import your modal
 
 const MyLoans = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isPayOpen, setIsPayOpen] = useState(false);
+
+  // Payment status modal state
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState("");
 
   const { data: userLoans = [], refetch } = useQuery({
     queryKey: ["userLoans", user?.email],
@@ -26,21 +29,39 @@ const MyLoans = () => {
     },
   });
 
+  // Check for success/canceled payment in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const loanId = params.get("loanId");
+    const success = params.get("success");
+
+    if (loanId) {
+      if (success === "true") {
+        // Update backend about paid fee
+        axiosSecure
+          .patch(`/apply-loans/${loanId}/pay-fee`)
+          .then(() => {
+            setPaymentMessage("Loan fee paid successfully!");
+            refetch();
+          })
+          .catch(() => setPaymentMessage("Failed to update loan fee status"))
+          .finally(() => setPaymentModalOpen(true));
+      } else if (success === "false") {
+        setPaymentMessage("Payment canceled!");
+        setPaymentModalOpen(true);
+      }
+    }
+  }, [axiosSecure, refetch]);
+
   const handleDelete = async (loanId) => {
     if (!loanId) return;
-
     try {
       await axiosSecure.delete(`/apply-loans/${loanId}`);
-
       setIsCancelOpen(false);
       setSelectedLoan(null);
-
       refetch();
-
-      toast.success("Loan cancelled successfully!");
     } catch (error) {
-      console.error("Failed to cancel loan:", error);
-      toast.error("Failed to cancel loan. Try again.");
+      console.error(error);
     }
   };
 
@@ -54,7 +75,6 @@ const MyLoans = () => {
     setIsViewOpen(true);
   };
 
-  // open pay modal
   const openPayModal = (loan) => {
     setSelectedLoan(loan);
     setIsPayOpen(true);
@@ -114,6 +134,13 @@ const MyLoans = () => {
           />
         </>
       )}
+
+      {/* Payment status modal */}
+      <PaymentModal
+        isOpen={paymentModalOpen}
+        message={paymentMessage}
+        onClose={() => setPaymentModalOpen(false)}
+      />
     </>
   );
 };
