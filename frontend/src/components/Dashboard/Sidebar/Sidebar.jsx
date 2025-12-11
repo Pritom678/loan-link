@@ -11,17 +11,22 @@ import { BsGraphUp } from "react-icons/bs";
 // User Menu
 import MenuItem from "./Menu/MenuItem";
 import AdminMenu from "./Menu/AdminMenu";
-import ManagerMenu from "./Menu/ManagerMenu";
 import BorrowerMenu from "./Menu/BorrowerMenu";
+import useRole from "../../../hooks/useRole";
+import LoadingSpinner from "../../Shared/LoadingSpinner";
+import ManagerMenu from "./Menu/ManagerMenu";
 
 const Sidebar = () => {
   const { logOut } = useAuth();
   const [isActive, setActive] = useState(false);
+  const [role, isRoleLoading] = useRole();
 
   // Sidebar Responsive Handler
   const handleToggle = () => {
     setActive(!isActive);
   };
+
+  if (isRoleLoading) return <LoadingSpinner />;
 
   return (
     <>
@@ -71,9 +76,9 @@ const Sidebar = () => {
                 address="/dashboard"
               />
               {/* Role-Based Menu */}
-              <BorrowerMenu />
-              <ManagerMenu />
-              <AdminMenu />
+              {role === "borrower" && <BorrowerMenu />}
+              {role === "manager" && <ManagerMenu />}
+              {role === "admin" && <AdminMenu />}
             </nav>
           </div>
 

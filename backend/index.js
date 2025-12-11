@@ -84,7 +84,6 @@ async function run() {
       next();
     };
 
-
     // Create a Checkout session
     app.post("/create-checkout-session", async (req, res) => {
       const { loanId, customerEmail } = req.body;
@@ -478,6 +477,12 @@ async function run() {
       res.send(result);
     });
 
+    //get a users role
+    app.get("/user/role", verifyJWT, async (req, res) => {
+      const result = await usersCollection.findOne({ email: req.tokenEmail });
+      res.send({ role: result?.role });
+    });
+
     //get user info by email
     app.get("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -509,6 +514,8 @@ async function run() {
 
       res.send(result);
     });
+
+    
 
     // update user role
     app.patch("/user/role/:id", async (req, res) => {

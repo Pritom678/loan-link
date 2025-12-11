@@ -6,7 +6,7 @@ const ManagerRoute = ({ children }) => {
   const [role, isRoleLoading] = useRole();
 
   if (isRoleLoading) return <LoadingSpinner />;
-  if (role === "seller") return children;
+  if (role === "manager") return children;
   return <Navigate to="/" replace="true" />;
 };
 

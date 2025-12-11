@@ -25,6 +25,8 @@ import AllLoans from "../pages/Dashboard/Admin/AllLoans";
 import LoanApplication from "../pages/Dashboard/Admin/LoanApplication";
 import PaymentSuccess from "../pages/Stripe/PaymentSucess";
 import PaymentCancel from "../pages/Stripe/PaymentCancel";
+import ManagerRoute from "./ManagerRoute";
+import AdminRoute from "./AdminRoute";
 
 export const router = createBrowserRouter([
   {
@@ -79,41 +81,51 @@ export const router = createBrowserRouter([
       {
         path: "add-loan",
         element: (
-          <PrivateRoute>
-            <AddLoan />
-          </PrivateRoute>
+          <ManagerRoute>
+            <PrivateRoute>
+              <AddLoan />
+            </PrivateRoute>
+          </ManagerRoute>
         ),
       },
       {
         path: "pending-loans",
         element: (
-          <PrivateRoute>
-            <PendingLoan />
-          </PrivateRoute>
+          <ManagerRoute>
+            <PrivateRoute>
+              <PendingLoan />
+            </PrivateRoute>
+          </ManagerRoute>
         ),
       },
       {
         path: "approved-loans",
         element: (
-          <PrivateRoute>
-            <ApprovedLoan />
-          </PrivateRoute>
+          <ManagerRoute>
+            <PrivateRoute>
+              <ApprovedLoan />
+            </PrivateRoute>
+          </ManagerRoute>
         ),
       },
       {
         path: "manage-users",
         element: (
-          <PrivateRoute>
-            <ManageUsers />
-          </PrivateRoute>
+          <AdminRoute>
+            <PrivateRoute>
+              <ManageUsers />
+            </PrivateRoute>
+          </AdminRoute>
         ),
       },
       {
         path: "all-loan",
         element: (
-          <PrivateRoute>
-            <AllLoans />
-          </PrivateRoute>
+          <AdminRoute>
+            <PrivateRoute>
+              <AllLoans />
+            </PrivateRoute>
+          </AdminRoute>
         ),
       },
       {
@@ -150,7 +162,13 @@ export const router = createBrowserRouter([
       },
       {
         path: "manage-loans ",
-        element: <ManageLoans />,
+        element: (
+          <ManagerRoute>
+            <PrivateRoute>
+              <ManageLoans />
+            </PrivateRoute>
+          </ManagerRoute>
+        ),
       },
     ],
   },
