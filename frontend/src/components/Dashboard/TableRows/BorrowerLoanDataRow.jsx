@@ -1,4 +1,10 @@
-const BorrowerLoanDataRow = ({ loan, onView, onCancel, onPay, onViewPayment }) => {
+const BorrowerLoanDataRow = ({
+  loan,
+  onView,
+  onCancel,
+  onPay,
+  onViewPayment,
+}) => {
   const statusColors = {
     Pending: "text-yellow-600 font-semibold",
     Approved: "text-green-600 font-semibold",
@@ -42,7 +48,7 @@ const BorrowerLoanDataRow = ({ loan, onView, onCancel, onPay, onViewPayment }) =
         )}
 
         {/* Paid badge (clickable if paymentId exists) */}
-        {loan.applicationStatus === "Paid" && loan.paymentId && (
+        {loan.applicationStatus === "Paid" && (
           <button
             onClick={() => onViewPayment()}
             className="px-4 py-2 text-white bg-green-600 shadow-md rounded-full text-sm font-semibold uppercase tracking-wide hover:bg-green-700 transition"

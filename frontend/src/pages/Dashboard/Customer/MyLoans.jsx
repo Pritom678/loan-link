@@ -44,7 +44,8 @@ const MyLoans = () => {
       axiosSecure
         .get(`/payment-details/${sessionId}`)
         .then(({ data }) => {
-          const paymentId = data.id; // Stripe PaymentIntent ID
+          console.log(data);
+          const paymentId = data.id; 
 
           // Step 2: Save paymentId in backend
           return axiosSecure.patch(`/apply-loans/${loanId}/pay-fee`, {
