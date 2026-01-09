@@ -27,6 +27,9 @@ import PaymentSuccess from "../pages/Stripe/PaymentSucess";
 import PaymentCancel from "../pages/Stripe/PaymentCancel";
 import ManagerRoute from "./ManagerRoute";
 import AdminRoute from "./AdminRoute";
+import PrivacyPolicy from "../pages/PrivacyPolicy/PrivacyPolicy";
+import TermsOfService from "../pages/TermsOfService/TermsOfService";
+import FAQ from "../pages/FAQ/FAQ";
 
 export const router = createBrowserRouter([
   {
@@ -65,6 +68,18 @@ export const router = createBrowserRouter([
             <ApplyForm />
           </PrivateRoute>
         ),
+      },
+      {
+        path: "/faq",
+        element: <FAQ />,
+      },
+      {
+        path: "/privacy-policy",
+        element: <PrivacyPolicy />,
+      },
+      {
+        path: "/terms-of-service",
+        element: <TermsOfService />,
       },
     ],
   },

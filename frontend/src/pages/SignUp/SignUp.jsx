@@ -22,12 +22,15 @@ const SignUp = () => {
   const onSubmit = async (data) => {
     const { name, image, email, password, role } = data;
 
-    const imageFile = image[0];
-
     try {
-      const imageURL = await imageUpload(imageFile);
-      
-      
+      let imageURL =
+        "https://i.ibb.co/tMkbc0pX/business-user-shield-78370-7029.avif"; // Default avatar
+
+      // Only try to upload if user selected an image
+      if (image && image[0]) {
+        const imageFile = image[0];
+        imageURL = await imageUpload(imageFile);
+      }
 
       //2. User Registration
       const result = await createUser(email, password);
@@ -66,8 +69,8 @@ const SignUp = () => {
     }
   };
   return (
-    <div className="flex justify-center items-center min-h-screen bg-white">
-      <div className="flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-amber-100 text-gray-900">
+    <div className="flex justify-center items-center min-h-screen bg-base-100">
+      <div className="flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-base-200 text-base-content">
         <div className="mb-8 text-center">
           <h1 className="my-3 text-4xl font-bold">
             Sign <span className="text-primary">Up</span>
@@ -128,7 +131,7 @@ const SignUp = () => {
       bg-gray-100 border border-dashed border-secondary rounded-md cursor-pointer
       focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary
       py-2"
-                {...register("image", { required: "Image is required" })}
+                {...register("image", { required: false })} // Made optional
               />
               <p className="mt-1 text-xs text-gray-400">
                 PNG, JPG or JPEG (max 2MB)

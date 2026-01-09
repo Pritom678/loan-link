@@ -9,7 +9,7 @@ const Logo = () => {
         <img
           src={logo}
           alt="logo"
-          className="w-[150px] h-auto transform scale-150 origin-left"
+          className="w-[150px] h-auto transform scale-150 origin-left logo-image"
         />
       </Link>
     </div>

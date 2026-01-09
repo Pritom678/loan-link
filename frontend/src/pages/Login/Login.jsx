@@ -4,6 +4,7 @@ import LoadingSpinner from "../../components/Shared/LoadingSpinner";
 import useAuth from "../../hooks/useAuth";
 import { FcGoogle } from "react-icons/fc";
 import { TbFidgetSpinner } from "react-icons/tb";
+import { FiUser } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { saveOrUpdateUser } from "../../utilities";
 
@@ -18,9 +19,27 @@ const Login = () => {
   const {
     register,
     handleSubmit,
-
+    setValue,
     formState: { errors },
   } = useForm();
+
+  // Demo login credentials
+  const demoCredentials = {
+    admin: { email: "Admin@gmail.com", password: "Admin@gmail.com" },
+    manager: { email: "Manager@gmail.com", password: "Manager@gmail.com" },
+    borrower: { email: "Rose@gmail.com", password: "Rose@gmail.com" },
+  };
+
+  const handleDemoLogin = (role) => {
+    const credentials = demoCredentials[role];
+    setValue("email", credentials.email);
+    setValue("password", credentials.password);
+
+    // Auto-submit the form
+    setTimeout(() => {
+      onSubmit(credentials);
+    }, 100);
+  };
 
   if (loading) return <LoadingSpinner />;
   if (user) return <Navigate to={from} replace={true} />;
@@ -65,8 +84,8 @@ const Login = () => {
     }
   };
   return (
-    <div className="flex justify-center items-center min-h-screen bg-white">
-      <div className="flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-amber-100 text-gray-900">
+    <div className="flex justify-center items-center min-h-screen bg-base-100">
+      <div className="flex flex-col max-w-md p-6 rounded-md sm:p-10 bg-base-200 text-base-content">
         <div className="mb-8 text-center">
           <h1 className="my-3 text-4xl font-bold">
             Log <span className="text-primary">In</span>
@@ -155,6 +174,36 @@ const Login = () => {
             </button>
           </div>
         </form>
+
+        {/* Demo Login Section */}
+        <div className="mt-6 p-4 bg-base-200 rounded-lg">
+          <h3 className="text-sm font-semibold text-center mb-3 text-gray-700">
+            Quick Demo Login
+          </h3>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => handleDemoLogin("admin")}
+              className="flex flex-col items-center p-2 bg-red-100 hover:bg-red-200 rounded-md transition-colors text-xs"
+            >
+              <FiUser className="mb-1" />
+              Admin
+            </button>
+            <button
+              onClick={() => handleDemoLogin("manager")}
+              className="flex flex-col items-center p-2 bg-blue-100 hover:bg-blue-200 rounded-md transition-colors text-xs"
+            >
+              <FiUser className="mb-1" />
+              Manager
+            </button>
+            <button
+              onClick={() => handleDemoLogin("borrower")}
+              className="flex flex-col items-center p-2 bg-green-100 hover:bg-green-200 rounded-md transition-colors text-xs"
+            >
+              <FiUser className="mb-1" />
+              Borrower
+            </button>
+          </div>
+        </div>
         <div className="space-y-1">
           <button className="text-xs hover:underline hover:text-secondary text-gray-400 cursor-pointer">
             Forgot password?

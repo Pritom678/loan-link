@@ -66,13 +66,13 @@ const HeroBanner = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
-                    onClick={() => navigate("/all-loans")}
+                    onClick={() => navigate("/all-loans-options")}
                     className="bg-accent hover:bg-secondary transition-colors text-white font-semibold px-6 py-3 rounded-lg"
                   >
                     Apply for Loan
                   </button>
                   <button
-                    onClick={() => navigate("/all-loans")}
+                    onClick={() => navigate("/all-loans-options")}
                     className="bg-white hover:bg-gray-100 transition-colors text-gray-900 font-semibold px-6 py-3 rounded-lg"
                   >
                     Explore Loans

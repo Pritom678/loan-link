@@ -20,6 +20,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:3000", // For any local backend testing
       "https://loanlinkph.netlify.app",
       "http://loanlinkph.netlify.app",
     ],
@@ -150,19 +152,23 @@ async function run() {
 
     //retrieve payment details
     app.get("/payment-details/:sessionId", async (req, res) => {
-  try {
-    const session = await stripe.checkout.sessions.retrieve(req.params.sessionId);
+      try {
+        const session = await stripe.checkout.sessions.retrieve(
+          req.params.sessionId
+        );
 
-    if (!session.payment_intent) {
-      return res.status(400).send({ message: "Payment not completed yet" });
-    }
+        if (!session.payment_intent) {
+          return res.status(400).send({ message: "Payment not completed yet" });
+        }
 
-    const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent);
-    res.send(paymentIntent);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
-  }
-});
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          session.payment_intent
+        );
+        res.send(paymentIntent);
+      } catch (error) {
+        res.status(400).send({ message: error.message });
+      }
+    });
 
     //save loan option in db
     app.post("/loans", async (req, res) => {

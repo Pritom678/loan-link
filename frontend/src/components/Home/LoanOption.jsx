@@ -2,6 +2,7 @@ import Card from "./Card";
 import Container from "../Shared/Container";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import LoadingSpinner from "../Shared/LoadingSpinner";
+import SkeletonCard from "../Shared/SkeletonCard";
 import { useQuery } from "@tanstack/react-query";
 
 const LoanOption = () => {
@@ -17,7 +18,23 @@ const LoanOption = () => {
     },
   });
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) {
+    return (
+      <Container>
+        <div className="text-center pt-12">
+          <h2 className="text-3xl font-bold mb-4">Our Loan Options</h2>
+          <p className="text-gray-600">
+            Explore a variety of loan options tailored to your needs.
+          </p>
+        </div>
+        <div className="pt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+          {Array.from({ length: 6 }, (_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container>

@@ -4,7 +4,10 @@ const Card = ({ loan }) => {
   const { _id, image, title, category, interest, limit } = loan;
 
   return (
-    <div className="bg-base-100 shadow-md rounded-xl overflow-hidden border border-base-300 hover:shadow-lg transition-shadow my-5">
+    <div className="bg-white loan-card shadow-md rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow my-5">
+      {/* Top Color Bar */}
+      <div className="h-1 bg-primary"></div>
+
       {/* Image */}
       <figure className="h-40 overflow-hidden">
         <img
@@ -16,16 +19,20 @@ const Card = ({ loan }) => {
 
       {/* Content */}
       <div className="p-4 space-y-2">
-        <h2 className="text-lg font-bold text-primary">{title}</h2>
-        <p className="text-sm text-neutral-700">
+        <h2 className="text-lg font-bold text-primary loan-card-title">
+          {title}
+        </h2>
+        <p className="text-sm text-gray-700 loan-card-text">
           Category:{" "}
           <span className="font-medium text-secondary">{category}</span>
         </p>
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-gray-700 loan-card-text">
           Interest:{" "}
-          <span className="font-medium text-secondary">{interest}</span>
+          <span className="font-medium text-secondary">
+            {typeof interest === "number" ? `${interest}%` : interest}
+          </span>
         </p>
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-gray-700 loan-card-text">
           Max Limit:{" "}
           <span className="font-medium text-secondary">
             ${limit.toLocaleString()}
