@@ -624,6 +624,45 @@ async function run() {
       res.send(user);
     });
 
+    //update user profile
+    app.put("/user/:email", verifyJWT, async (req, res) => {
+      try {
+        const email = req.params.email;
+        const { displayName, bio, profilePicture } = req.body;
+
+        // Verify the user can only update their own profile
+        if (req.tokenEmail !== email) {
+          return res.status(403).send({ message: "Forbidden Access!" });
+        }
+
+        const updateDoc = {
+          $set: {
+            displayName,
+            bio,
+            profilePicture,
+            updatedAt: new Date().toISOString(),
+          },
+        };
+
+        const result = await usersCollection.updateOne({ email }, updateDoc, {
+          upsert: false,
+        });
+
+        if (result.matchedCount === 0) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        res.send({
+          success: true,
+          message: "Profile updated successfully",
+          result,
+        });
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).send({ message: "Failed to update profile", error });
+      }
+    });
+
     //get all user info
     app.get("/user", verifyJWT, verifyADMIN, async (req, res) => {
       const result = await usersCollection.find().toArray();

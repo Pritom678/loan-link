@@ -21,11 +21,15 @@ const PaymentSuccess = () => {
     axiosSecure
       .patch(`/apply-loans/${loanId}/pay-fee`)
       .then(() => {
-        setMessage("Payment successful! Loan fee is now paid.");
+        setMessage(
+          "Payment successful! Your loan application fee has been processed and your application is now under review."
+        );
         setShowConfetti(true);
       })
       .catch(() =>
-        setMessage("Payment succeeded but failed to update backend.")
+        setMessage(
+          "Payment succeeded but failed to update backend. Please contact support if needed."
+        )
       )
       .finally(() => setModalOpen(true));
   }, [loanId, axiosSecure]);
@@ -38,8 +42,15 @@ const PaymentSuccess = () => {
 
   return (
     <>
-      {showConfetti && <Confetti width={width} height={height} recycle={false} />}
-      <PaymentModal isOpen={modalOpen} message={message} onClose={handleClose} />
+      {showConfetti && (
+        <Confetti width={width} height={height} recycle={false} />
+      )}
+      <PaymentModal
+        isOpen={modalOpen}
+        message={message}
+        onClose={handleClose}
+        type="success"
+      />
     </>
   );
 };

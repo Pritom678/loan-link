@@ -1,8 +1,6 @@
-import { useState} from "react";
-
+import { useState } from "react";
 import PaymentModal from "../../components/Modal/PaymentModal";
 import { useNavigate, useSearchParams } from "react-router";
-
 
 const PaymentCancel = () => {
   const [searchParams] = useSearchParams();
@@ -18,8 +16,9 @@ const PaymentCancel = () => {
   return (
     <PaymentModal
       isOpen={modalOpen}
-      message={`Payment canceled for loan ${loanId}`}
+      message={`Payment was canceled for loan application. You can try again anytime from your dashboard.`}
       onClose={handleClose}
+      type="error"
     />
   );
 };

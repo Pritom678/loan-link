@@ -19,6 +19,21 @@ import {
   FiDollarSign,
 } from "react-icons/fi";
 
+const StatCard = ({ icon: IconComponent, title, value, subtitle }) => (
+  <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="flex items-center">
+      <div className="p-3 rounded-full bg-primary/10">
+        <IconComponent className="w-6 h-6 text-primary" />
+      </div>
+      <div className="ml-4">
+        <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+        <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+      </div>
+    </div>
+  </div>
+);
+
 const LoanStatusChart = ({ loans = [] }) => {
   // Calculate loan statistics
   const getStatistics = () => {
@@ -28,13 +43,16 @@ const LoanStatusChart = ({ loans = [] }) => {
       approved: loans.filter((loan) => loan.status === "approved").length,
       rejected: loans.filter((loan) => loan.status === "rejected").length,
       paid: loans.filter((loan) => loan.paymentId).length,
-      totalAmount: loans.reduce(
-        (sum, loan) => sum + (parseFloat(loan.amount) || 0),
-        0
-      ),
+      totalAmount: loans.reduce((sum, loan) => {
+        const amount = parseFloat(loan.amount);
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0),
       approvedAmount: loans
         .filter((loan) => loan.status === "approved")
-        .reduce((sum, loan) => sum + (parseFloat(loan.amount) || 0), 0),
+        .reduce((sum, loan) => {
+          const amount = parseFloat(loan.amount);
+          return sum + (isNaN(amount) ? 0 : amount);
+        }, 0),
     };
     return stats;
   };
@@ -83,21 +101,6 @@ const LoanStatusChart = ({ loans = [] }) => {
   };
 
   const monthlyData = getMonthlyData();
-
-  const StatCard = ({ icon: Icon, title, value, subtitle }) => (
-    <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div className="flex items-center">
-        <div className="p-3 rounded-full bg-primary/10">
-          <Icon className="w-6 h-6 text-primary" />
-        </div>
-        <div className="ml-4">
-          <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-          {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
-        </div>
-      </div>
-    </div>
-  );
 
   const RADIAN = Math.PI / 180;
   const renderCustomizedLabel = ({
@@ -159,12 +162,12 @@ const LoanStatusChart = ({ loans = [] }) => {
           icon={FiCheckCircle}
           title="Approved Loans"
           value={stats.approved}
-          subtitle={`$${stats.approvedAmount.toLocaleString()}`}
+          subtitle={`$${(stats.approvedAmount || 0).toLocaleString()}`}
         />
         <StatCard
           icon={FiDollarSign}
           title="Total Requested"
-          value={`$${stats.totalAmount.toLocaleString()}`}
+          value={`$${(stats.totalAmount || 0).toLocaleString()}`}
           subtitle="All applications"
         />
       </div>
