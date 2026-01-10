@@ -37,7 +37,7 @@ const Profile = () => {
         // Show success message
         const successDiv = document.createElement("div");
         successDiv.className =
-          "fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50";
+          "fixed top-4 right-4 bg-amber-500 text-white px-6 py-3 rounded-lg shadow-lg z-50";
         successDiv.textContent = "Profile updated successfully!";
         document.body.appendChild(successDiv);
 
@@ -54,7 +54,7 @@ const Profile = () => {
       // Show error message
       const errorDiv = document.createElement("div");
       errorDiv.className =
-        "fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50";
+        "fixed top-4 right-4 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg z-50";
       errorDiv.textContent = "Failed to save profile. Please try again.";
       document.body.appendChild(errorDiv);
 
@@ -80,7 +80,7 @@ const Profile = () => {
     },
   });
 
-  const { data: userLoans = [] } = useQuery({
+  const { data: userLoansResponse = [] } = useQuery({
     queryKey: ["userLoans", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -88,6 +88,9 @@ const Profile = () => {
       return res.data;
     },
   });
+
+  // Extract loans from the API response structure
+  const userLoans = userLoansResponse?.data || userLoansResponse || [];
 
   const getRoleColor = () => {
     switch (role) {
@@ -234,7 +237,7 @@ const Profile = () => {
               <div className="mt-6">
                 <button
                   onClick={logOut}
-                  className="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="inline-flex items-center px-4 py-2 border border-orange-300 rounded-md shadow-sm text-sm font-medium text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                 >
                   <FiLogOut className="w-4 h-4 mr-2" />
                   Sign Out

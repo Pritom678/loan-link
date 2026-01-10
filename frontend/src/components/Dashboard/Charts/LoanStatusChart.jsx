@@ -19,15 +19,15 @@ import {
   FiDollarSign,
 } from "react-icons/fi";
 
-const StatCard = ({ icon: Icon, title, value, subtitle }) => (
+const StatCard = ({ icon: IconComponent, title, value, subtitle }) => (
   <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <div className="flex items-center">
       <div className="p-3 rounded-full bg-primary/10">
-        <Icon className="w-6 h-6 text-primary" />
+        {IconComponent && <IconComponent className="w-6 h-6 text-primary" />}
       </div>
       <div className="ml-4">
         <h3 className="text-sm font-medium text-gray-500">{title}</h3>
-        <p className="text-2xl font-semibold text-gray-900">{value}</p>
+        <p className="text-2xl font-semibold text-gray-900">{value || 0}</p>
         {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
       </div>
     </div>
@@ -64,8 +64,8 @@ const LoanStatusChart = ({ loans = [] }) => {
   const chartData = useMemo(() => {
     const pieData = [
       { name: "Pending", value: statistics.pending, color: "#f59e0b" },
-      { name: "Approved", value: statistics.approved, color: "#10b981" },
-      { name: "Rejected", value: statistics.rejected, color: "#ef4444" },
+      { name: "Approved", value: statistics.approved, color: "#ea580c" },
+      { name: "Rejected", value: statistics.rejected, color: "#d97706" },
     ].filter((item) => item.value > 0);
 
     const monthlyData = [
@@ -81,17 +81,25 @@ const LoanStatusChart = ({ loans = [] }) => {
   }, [statistics]);
 
   const formatCurrency = (amount) => {
+    const safeAmount = parseFloat(amount) || 0;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }).format(amount || 0);
+    }).format(safeAmount);
   };
 
   const formatPercentage = (value, total) => {
-    if (total === 0) return "0%";
-    return `${((value / total) * 100).toFixed(1)}%`;
+    if (!total || total === 0) return "0%";
+    const safeValue = parseFloat(value) || 0;
+    const safeTotal = parseFloat(total) || 1;
+    return `${((safeValue / safeTotal) * 100).toFixed(1)}%`;
+  };
+
+  const safeToLocaleString = (value) => {
+    const safeValue = parseFloat(value) || 0;
+    return safeValue.toLocaleString();
   };
 
   if (statistics.total === 0) {
@@ -117,7 +125,7 @@ const LoanStatusChart = ({ loans = [] }) => {
         <StatCard
           icon={FiTrendingUp}
           title="Total Applications"
-          value={statistics.total.toLocaleString()}
+          value={safeToLocaleString(statistics.total)}
           subtitle={`${formatPercentage(
             statistics.approved,
             statistics.total
@@ -126,7 +134,7 @@ const LoanStatusChart = ({ loans = [] }) => {
         <StatCard
           icon={FiClock}
           title="Pending Review"
-          value={statistics.pending.toLocaleString()}
+          value={safeToLocaleString(statistics.pending)}
           subtitle={`${formatPercentage(
             statistics.pending,
             statistics.total
@@ -135,7 +143,7 @@ const LoanStatusChart = ({ loans = [] }) => {
         <StatCard
           icon={FiCheckCircle}
           title="Approved Loans"
-          value={statistics.approved.toLocaleString()}
+          value={safeToLocaleString(statistics.approved)}
           subtitle={`${formatPercentage(
             statistics.approved,
             statistics.total
@@ -168,7 +176,7 @@ const LoanStatusChart = ({ loans = [] }) => {
                     `${name} ${(percent * 100).toFixed(0)}%`
                   }
                   outerRadius={80}
-                  fill="#8884d8"
+                  fill="#f59e0b"
                   dataKey="value"
                 >
                   {chartData.pieData.map((entry, index) => (
@@ -202,8 +210,8 @@ const LoanStatusChart = ({ loans = [] }) => {
                 fill="#9c6c1e"
                 name="Total Applications"
               />
-              <Bar dataKey="approved" fill="#10b981" name="Approved" />
-              <Bar dataKey="rejected" fill="#ef4444" name="Rejected" />
+              <Bar dataKey="approved" fill="#ea580c" name="Approved" />
+              <Bar dataKey="rejected" fill="#d97706" name="Rejected" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -213,8 +221,8 @@ const LoanStatusChart = ({ loans = [] }) => {
       <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="text-center p-4 bg-amber-50 rounded-lg">
+            <div className="text-2xl font-bold text-amber-600">
               {formatPercentage(statistics.approved, statistics.total)}
             </div>
             <div className="text-sm text-green-700">Approval Rate</div>
@@ -225,9 +233,13 @@ const LoanStatusChart = ({ loans = [] }) => {
             </div>
             <div className="text-sm text-yellow-700">Pending Review</div>
           </div>
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">
-              {formatCurrency(statistics.totalAmount / (statistics.total || 1))}
+          <div className="text-center p-4 bg-orange-50 rounded-lg">
+            <div className="text-2xl font-bold text-orange-600">
+              {formatCurrency(
+                statistics.total > 0
+                  ? statistics.totalAmount / statistics.total
+                  : 0
+              )}
             </div>
             <div className="text-sm text-blue-700">Average Amount</div>
           </div>

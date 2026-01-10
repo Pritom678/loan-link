@@ -84,32 +84,32 @@ const AdminStatistics = () => {
           title="Total Loans Applied"
           value={stats.totalLoans}
           icon={FaFileAlt}
-          fromColor="from-blue-500"
-          toColor="to-blue-400"
+          fromColor="from-amber-500"
+          toColor="to-amber-400"
         />
 
         <StatCard
           title="Approved Loans"
           value={stats.approvedLoans}
           icon={FaCheckCircle}
-          fromColor="from-green-500"
-          toColor="to-green-400"
+          fromColor="from-orange-500"
+          toColor="to-orange-400"
         />
 
         <StatCard
           title="Rejected Loans"
           value={stats.rejectedLoans}
           icon={FaTimesCircle}
-          fromColor="from-red-500"
-          toColor="to-red-400"
+          fromColor="from-yellow-600"
+          toColor="to-yellow-500"
         />
 
         <StatCard
           title="Total Users"
           value={stats.totalUsers}
           icon={FaUsers}
-          fromColor="from-purple-500"
-          toColor="to-purple-400"
+          fromColor="from-amber-600"
+          toColor="to-amber-500"
         />
       </div>
 

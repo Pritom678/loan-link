@@ -10,13 +10,34 @@ const useRole = () => {
     queryKey: ["role", user?.email],
     enabled: !loading && !!user?.email,
     queryFn: async () => {
-      const res = await axiosSecure.get("/user/role");
-      return res.data; // { role: "admin" } or { role: "borrower" }
+      try {
+        const res = await axiosSecure.get("/user/role");
+
+        // If role is missing or invalid, try to fix it
+        if (!res.data?.role) {
+          try {
+            const fixRes = await axiosSecure.patch(`/user/${user.email}/role`);
+            return { role: fixRes.data?.data?.role || "borrower" };
+          } catch (fixError) {
+            console.error("Failed to fix user role:", fixError);
+            return { role: "borrower" };
+          }
+        }
+
+        return res.data;
+      } catch (error) {
+        console.error("Failed to fetch user role:", error);
+        // Return default role if API fails
+        return { role: "borrower" };
+      }
     },
-    placeholderData: { role: null },
+    placeholderData: { role: "borrower" }, // Default to borrower
   });
 
-  return [data?.role, isLoading];
+  // Ensure we always return a valid role, defaulting to borrower
+  const role = data?.role || "borrower";
+
+  return [role, isLoading];
 };
 
 export default useRole;

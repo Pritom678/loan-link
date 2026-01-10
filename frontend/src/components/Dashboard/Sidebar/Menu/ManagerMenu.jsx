@@ -17,9 +17,9 @@ const ManagerMenu = () => {
         address="approved-loans"
       />
       <MenuItem
-        icon={MdManageAccounts }
+        icon={MdManageAccounts}
         label="Manage Loans"
-        address="manage-loans "
+        address="manage-loans"
       />
     </>
   );

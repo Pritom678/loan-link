@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 const LoanOption = () => {
   const axiosSecure = useAxiosSecure();
 
-  const { data: loans = [], isLoading } = useQuery({
+  const { data: loansResponse, isLoading } = useQuery({
     queryKey: ["loans"],
     queryFn: async () => {
       const result = await axiosSecure(
@@ -17,6 +17,9 @@ const LoanOption = () => {
       return result.data;
     },
   });
+
+  // Extract loans from the API response structure
+  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
 
   if (isLoading) {
     return (

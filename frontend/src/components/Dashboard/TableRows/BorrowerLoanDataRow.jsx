@@ -25,13 +25,13 @@ const BorrowerLoanDataRow = ({
         label: "Pending",
       },
       approved: {
-        bg: "bg-green-100",
-        text: "text-green-800",
+        bg: "bg-amber-100",
+        text: "text-amber-800",
         label: "Approved",
       },
       rejected: {
-        bg: "bg-red-100",
-        text: "text-red-800",
+        bg: "bg-orange-100",
+        text: "text-orange-800",
         label: "Rejected",
       },
     };
@@ -124,7 +124,7 @@ const BorrowerLoanDataRow = ({
           <div className="status-badge">{getStatusBadge(loan.status)}</div>
           {loan.applicationStatus === "Paid" && (
             <div className="status-badge">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 w-fit">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 w-fit">
                 Paid
               </span>
             </div>
@@ -156,7 +156,7 @@ const BorrowerLoanDataRow = ({
             loan.status !== "Rejected" && (
               <button
                 onClick={onCancel}
-                className="inline-flex items-center px-2 py-1 border border-red-300 shadow-sm text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="inline-flex items-center px-2 py-1 border border-orange-300 shadow-sm text-xs font-medium rounded text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                 title="Cancel Application"
               >
                 <FiX className="w-3 h-3" />
@@ -179,7 +179,7 @@ const BorrowerLoanDataRow = ({
           {loan.applicationStatus === "Paid" && (
             <button
               onClick={() => onViewPayment()}
-              className="inline-flex items-center px-2 py-1 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              className="inline-flex items-center px-2 py-1 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
               title="View Payment"
             >
               <FiCreditCard className="w-3 h-3" />

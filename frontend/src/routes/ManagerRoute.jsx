@@ -1,4 +1,4 @@
-import { Navigate} from "react-router";
+import { Navigate } from "react-router";
 import LoadingSpinner from "../components/Shared/LoadingSpinner";
 import useRole from "../hooks/useRole";
 
@@ -7,6 +7,7 @@ const ManagerRoute = ({ children }) => {
 
   if (isRoleLoading) return <LoadingSpinner />;
   if (role === "manager") return children;
+
   return <Navigate to="/" replace="true" />;
 };
 

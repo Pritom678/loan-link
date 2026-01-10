@@ -7,7 +7,7 @@ const BorrowerStatistics = () => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
 
-  const { data: userLoans = [], isLoading } = useQuery({
+  const { data: userLoansResponse = [], isLoading } = useQuery({
     queryKey: ["userLoans", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -15,6 +15,9 @@ const BorrowerStatistics = () => {
       return res.data;
     },
   });
+
+  // Extract loans from the API response structure
+  const userLoans = userLoansResponse?.data || userLoansResponse || [];
 
   if (isLoading)
     return <div className="text-center mt-10">Loading stats...</div>;

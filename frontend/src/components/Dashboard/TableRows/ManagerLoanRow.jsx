@@ -4,7 +4,7 @@ import UpdateLoanModal from "../../Modal/UpdateLoanModal";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
 
-const ManagerLoanRow = ({ loan, removeLoanFromTable, refetch }) => {
+const ManagerLoanRow = ({ loan, removeLoanFromTable, refetch, index }) => {
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -29,27 +29,44 @@ const ManagerLoanRow = ({ loan, removeLoanFromTable, refetch }) => {
 
   return (
     <>
-      <tr key={loan._id}>
-        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-          <img src={loan.image} className="w-10" />
+      <tr
+        className={`${
+          index % 2 === 0 ? "bg-white" : "bg-gray-50"
+        } hover:bg-amber-50 transition-colors duration-200`}
+      >
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="flex-shrink-0 h-16 w-16">
+            <img
+              src={loan.image}
+              alt={loan.title}
+              className="h-16 w-16 rounded-lg object-cover border-2 border-amber-200"
+            />
+          </div>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-          <p className="text-gray-900">{loan.title}</p>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="text-sm font-medium text-gray-900">{loan.title}</div>
+          <div className="text-sm text-gray-500">
+            Max: ${loan.limit?.toLocaleString()}
+          </div>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-          <p className="text-gray-900">{loan.interest} %</p>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800">
+            {loan.interest}%
+          </div>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-          <p className="text-gray-900">{loan.category}</p>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+            {loan.category}
+          </div>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-          <span className="flex items-center gap-2">
+        <td className="px-6 py-4 whitespace-nowrap">
+          <div className="flex items-center space-x-3">
             <button
               onClick={() => {
                 setSelectedLoan(loan);
                 setIsUpdateOpen(true);
               }}
-              className="px-3 py-1 text-white bg-accent rounded-md hover:bg-secondary"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors duration-200"
             >
               Update
             </button>
@@ -58,11 +75,11 @@ const ManagerLoanRow = ({ loan, removeLoanFromTable, refetch }) => {
                 setSelectedLoan(loan);
                 setIsDeleteOpen(true);
               }}
-              className="px-3 py-1 text-white bg-red-700 rounded-md hover:bg-red-900"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200"
             >
               Delete
             </button>
-          </span>
+          </div>
 
           {/* Delete Modal */}
           {selectedLoan && (

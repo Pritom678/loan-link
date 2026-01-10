@@ -4,10 +4,36 @@ import BorrowerStatistics from "../../../components/Dashboard/Statistics/Borrowe
 import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
 import useRole from "../../../hooks/useRole";
 import useAuth from "../../../hooks/useAuth";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
 
 const Statistics = () => {
   const [role, isRoleLoading] = useRole();
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const [isFixingRole, setIsFixingRole] = useState(false);
+
+  const handleFixRole = async () => {
+    if (!user?.email) return;
+
+    setIsFixingRole(true);
+    try {
+      const response = await axiosSecure.patch(`/user/${user.email}/role`);
+      toast.success("Role updated successfully! Please refresh the page.");
+      console.log("Role fix response:", response.data);
+
+      // Refresh the page to reload with new role
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to fix role:", error);
+      toast.error("Failed to update role. Please try again.");
+    } finally {
+      setIsFixingRole(false);
+    }
+  };
 
   if (isRoleLoading) return <LoadingSpinner />;
 
@@ -60,6 +86,15 @@ const Statistics = () => {
               <span className="text-sm text-gray-500">
                 Last login: {new Date().toLocaleDateString()}
               </span>
+              {(!role || role === "undefined" || role === "null") && (
+                <button
+                  onClick={handleFixRole}
+                  disabled={isFixingRole}
+                  className="px-3 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full hover:bg-yellow-200 transition-colors disabled:opacity-50"
+                >
+                  {isFixingRole ? "Fixing..." : "Fix Role"}
+                </button>
+              )}
             </div>
           </div>
           <div className="hidden md:block">
@@ -82,6 +117,58 @@ const Statistics = () => {
         {role === "admin" && <AdminStatistics />}
         {role === "manager" && <ManagerStatistics />}
         {role === "borrower" && <BorrowerStatistics />}
+        {(!role || !["admin", "manager", "borrower"].includes(role)) && (
+          <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="text-center py-8">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Role Configuration Issue
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Your account role is not properly configured. Click the button
+                below to fix this issue, or use one of the demo accounts.
+              </p>
+              <button
+                onClick={handleFixRole}
+                disabled={isFixingRole}
+                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 mb-6"
+              >
+                {isFixingRole ? "Fixing Role..." : "Fix My Role"}
+              </button>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <h4 className="text-md font-medium text-blue-900 mb-3">
+                  💡 Demo Accounts Available
+                </h4>
+                <p className="text-blue-800 text-sm mb-3">
+                  For testing purposes, you can also use these demo accounts:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                  <div className="bg-white p-3 rounded border">
+                    <div className="font-medium text-red-700">
+                      Admin Account
+                    </div>
+                    <div className="text-gray-600">Admin@gmail.com</div>
+                    <div className="text-gray-600">Admin@gmail.com</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="font-medium text-blue-700">
+                      Manager Account
+                    </div>
+                    <div className="text-gray-600">Manager@gmail.com</div>
+                    <div className="text-gray-600">Manager@gmail.com</div>
+                  </div>
+                  <div className="bg-white p-3 rounded border">
+                    <div className="font-medium text-green-700">
+                      Borrower Account
+                    </div>
+                    <div className="text-gray-600">Rose@gmail.com</div>
+                    <div className="text-gray-600">Rose@gmail.com</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

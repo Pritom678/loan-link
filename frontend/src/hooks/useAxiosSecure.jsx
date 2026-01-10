@@ -27,7 +27,15 @@ const useAxiosSecure = () => {
     const responseInterceptor = instance.interceptors.response.use(
       (res) => res,
       async (err) => {
-        if (err?.response?.status === 401 || err?.response?.status === 403) {
+        // Don't auto-logout for role-related requests as they might just mean insufficient permissions
+        const isRoleRequest =
+          err?.config?.url?.includes("/user/role") ||
+          err?.config?.url?.includes("-stats");
+
+        if (
+          (err?.response?.status === 401 || err?.response?.status === 403) &&
+          !isRoleRequest
+        ) {
           await logOut();
           navigate("/login");
         }

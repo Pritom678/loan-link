@@ -7,13 +7,20 @@ import EditLoanModal from "../../../components/Modal/EditLoanModal";
 
 const AllLoans = () => {
   const axiosSecure = useAxiosSecure();
-  const { data: loans = [], isLoading, refetch } = useQuery({
+  const {
+    data: loansResponse,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["allLoans"],
     queryFn: async () => {
-      const { data } = await axiosSecure.get(`/loans/all`);
+      const { data } = await axiosSecure.get(`/loans`);
       return data;
     },
   });
+
+  // Extract loans from the API response structure
+  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
 
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

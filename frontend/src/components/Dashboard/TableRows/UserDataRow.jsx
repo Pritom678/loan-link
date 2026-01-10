@@ -26,23 +26,23 @@ const UserDataRow = ({ user, refetch }) => {
           onClick={() => setIsRoleModalOpen(true)}
           className="relative cursor-pointer inline-block px-3 py-1 font-semibold text-green-900 leading-tight mr-3"
         >
-          <span className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
+          <span className="absolute inset-0 bg-amber-200 opacity-50 rounded-full"></span>
           <span className="relative">Update Role</span>
         </span>
 
         {/* Suspend Button */}
-        
+
         {user?.status === "suspended" ? (
-          <span className="relative inline-block px-3 py-1 font-semibold text-red-700 leading-tight">
-            <span className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
+          <span className="relative inline-block px-3 py-1 font-semibold text-orange-700 leading-tight">
+            <span className="absolute inset-0 bg-orange-200 opacity-50 rounded-full"></span>
             <span className="relative">Suspended</span>
           </span>
         ) : (
           <span
             onClick={() => setIsSuspendModalOpen(true)}
-            className="relative cursor-pointer inline-block px-3 py-1 font-semibold text-red-900 leading-tight"
+            className="relative cursor-pointer inline-block px-3 py-1 font-semibold text-orange-900 leading-tight"
           >
-            <span className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
+            <span className="absolute inset-0 bg-orange-200 opacity-50 rounded-full"></span>
             <span className="relative">Suspend</span>
           </span>
         )}

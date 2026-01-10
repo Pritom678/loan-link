@@ -10,7 +10,10 @@ import ViewMyLoanModal from "../../../components/Modal/ViewMyLoanModal";
 import PayModal from "../../../components/Modal/PayModal";
 import PaymentModal from "../../../components/Modal/PaymentModal";
 import PaymentDetailModal from "../../../components/Modal/PaymentDetailModal";
-import { TableSkeleton, StatsSkeleton } from "../../../components/Shared/SkeletonLoader";
+import {
+  TableSkeleton,
+  StatsSkeleton,
+} from "../../../components/Shared/SkeletonLoader";
 import {
   FiFileText,
   FiFilter,
@@ -48,7 +51,7 @@ const MyLoans = () => {
     data: userLoans = [],
     refetch,
     isLoading,
-    error
+    error,
   } = useQuery({
     queryKey: ["userLoans", user?.email],
     queryFn: async () => {
@@ -60,9 +63,9 @@ const MyLoans = () => {
     cacheTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
     onError: (error) => {
-      console.error('Failed to fetch loans:', error);
-      toast.error('Failed to load loans. Please try again.');
-    }
+      console.error("Failed to fetch loans:", error);
+      toast.error("Failed to load loans. Please try again.");
+    },
   });
 
   // Memoized filtered and sorted loans
@@ -89,9 +92,13 @@ const MyLoans = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "newest":
-          return new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt);
+          return (
+            new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt)
+          );
         case "oldest":
-          return new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt);
+          return (
+            new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt)
+          );
         case "amount-high":
           return parseFloat(b.loanAmount || 0) - parseFloat(a.loanAmount || 0);
         case "amount-low":
@@ -118,7 +125,7 @@ const MyLoans = () => {
     nextPage,
     prevPage,
     startIndex,
-    endIndex
+    endIndex,
   } = usePagination(filteredLoans, 10);
 
   // Statistics
@@ -126,13 +133,19 @@ const MyLoans = () => {
     const loans = Array.isArray(userLoans) ? userLoans : [];
     return {
       total: loans.length,
-      pending: loans.filter(loan => loan.status === "Pending" || loan.status === "pending").length,
-      approved: loans.filter(loan => loan.status === "Approved" || loan.status === "approved").length,
-      rejected: loans.filter(loan => loan.status === "Rejected" || loan.status === "rejected").length,
+      pending: loans.filter(
+        (loan) => loan.status === "Pending" || loan.status === "pending"
+      ).length,
+      approved: loans.filter(
+        (loan) => loan.status === "Approved" || loan.status === "approved"
+      ).length,
+      rejected: loans.filter(
+        (loan) => loan.status === "Rejected" || loan.status === "rejected"
+      ).length,
       totalAmount: loans.reduce((sum, loan) => {
         const amount = parseFloat(loan.loanAmount || 0);
         return sum + (isNaN(amount) ? 0 : amount);
-      }, 0)
+      }, 0),
     };
   }, [userLoans]);
 
@@ -146,7 +159,7 @@ const MyLoans = () => {
 
         const headers = [
           "Loan ID",
-          "Loan Title", 
+          "Loan Title",
           "Amount",
           "Interest Rate",
           "Term",
@@ -171,11 +184,16 @@ const MyLoans = () => {
           ),
         ].join("\n");
 
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-        link.setAttribute("download", `my-loans-${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute(
+          "download",
+          `my-loans-${new Date().toISOString().split("T")[0]}.csv`
+        );
         link.style.visibility = "hidden";
         document.body.appendChild(link);
         link.click();
@@ -185,7 +203,7 @@ const MyLoans = () => {
       {
         showSuccessToast: true,
         successMessage: "Loans exported successfully!",
-        showErrorToast: true
+        showErrorToast: true,
       }
     );
   }, [filteredLoans, execute]);
@@ -199,7 +217,7 @@ const MyLoans = () => {
       {
         showSuccessToast: true,
         successMessage: "Loans refreshed successfully!",
-        showErrorToast: true
+        showErrorToast: true,
       }
     );
   }, [refetch, execute]);
@@ -226,180 +244,6 @@ const MyLoans = () => {
     setStatusFilter("all");
     setSortBy("newest");
   }, []);
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">My Loan Applications</h1>
-            <p className="mt-1 text-sm text-gray-500">
-              Track and manage your loan applications
-            </p>
-          </div>
-        </div>
-        <StatsSkeleton count={4} />
-        <TableSkeleton />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <FiFileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Failed to Load Loans</h3>
-        <p className="text-gray-500 mb-4">There was an error loading your loan applications.</p>
-        <button
-          onClick={handleRefresh}
-          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          <FiRefreshCw className="w-4 h-4 mr-2" />
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Loan Applications</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Track and manage your loan applications
-          </p>
-        </div>
-        <div className="mt-4 sm:mt-0 flex space-x-3">
-          <button
-            onClick={handleRefresh}
-            disabled={apiLoading}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <FiRefreshCw className={`w-4 h-4 mr-2 ${apiLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-          <button
-            onClick={handleExport}
-            disabled={filteredLoans.length === 0 || apiLoading}
-            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <FiDownload className="w-4 h-4 mr-2" />
-            Export CSV
-          </button>
-        </div>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100">
-              <FiFileText className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Total Applications</h3>
-              <p className="text-2xl font-semibold text-gray-900">{statistics.total}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-yellow-100">
-              <FiCalendar className="w-6 h-6 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Pending</h3>
-              <p className="text-2xl font-semibold text-gray-900">{statistics.pending}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100">
-              <FiFileText className="w-6 h-6 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Approved</h3>
-              <p className="text-2xl font-semibold text-gray-900">{statistics.approved}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-primary/10">
-              <FiFileText className="w-6 h-6 text-primary" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Total Amount</h3>
-              <p className="text-2xl font-semibold text-gray-900">
-                ${statistics.totalAmount.toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-          loan.applicationStatus,
-          new Date(loan.createdAt || loan.appliedAt).toLocaleDateString(),
-        ].join(",")
-      ),
-    ].join("\n");
-
-    // Create and download file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `my-loans-${new Date().toISOString().split("T")[0]}.csv`
-    );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Show success message
-    alert(
-      `Successfully exported ${filteredLoans.length} loan records to CSV file.`
-    );
-  };
-  const filteredLoans = userLoans
-    .filter((loan) => {
-      const matchesSearch =
-        loan.loanTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        loan.loanId?.toString().includes(searchTerm);
-
-      const matchesStatus =
-        statusFilter === "all" ||
-        loan.status?.toLowerCase() === statusFilter.toLowerCase();
-
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return (
-            new Date(b.createdAt || b.appliedAt) -
-            new Date(a.createdAt || a.appliedAt)
-          );
-        case "oldest":
-          return (
-            new Date(a.createdAt || a.appliedAt) -
-            new Date(b.createdAt || b.appliedAt)
-          );
-        case "amount-high":
-          return parseFloat(b.loanAmount || 0) - parseFloat(a.loanAmount || 0);
-        case "amount-low":
-          return parseFloat(a.loanAmount || 0) - parseFloat(b.loanAmount || 0);
-        default:
-          return 0;
-      }
-    });
 
   // Handle Stripe success redirect
   useEffect(() => {
@@ -445,21 +289,6 @@ const MyLoans = () => {
     }
   };
 
-  const openCancelModal = (loan) => {
-    setSelectedLoan(loan);
-    setIsCancelOpen(true);
-  };
-
-  const openViewModal = (loan) => {
-    setSelectedLoan(loan);
-    setIsViewOpen(true);
-  };
-
-  const openPayModal = (loan) => {
-    setSelectedLoan(loan);
-    setIsPayOpen(true);
-  };
-
   const handleViewPayment = async (paymentId) => {
     if (!paymentId) return;
     setPaymentDetailModalOpen(true);
@@ -472,9 +301,49 @@ const MyLoans = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              My Loan Applications
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Track and manage your loan applications
+            </p>
+          </div>
+        </div>
+        <StatsSkeleton count={4} />
+        <TableSkeleton />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <FiFileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          Failed to Load Loans
+        </h3>
+        <p className="text-gray-500 mb-4">
+          There was an error loading your loan applications.
+        </p>
+        <button
+          onClick={handleRefresh}
+          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <FiRefreshCw className="w-4 h-4 mr-2" />
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Page Header */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -484,21 +353,21 @@ const MyLoans = () => {
             Track and manage your loan applications
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+        <div className="mt-4 sm:mt-0 flex space-x-3">
           <button
-            onClick={() => refetch()}
-            disabled={isLoading}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleRefresh}
+            disabled={apiLoading}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <FiRefreshCw
-              className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+              className={`w-4 h-4 mr-2 ${apiLoading ? "animate-spin" : ""}`}
             />
-            {isLoading ? "Refreshing..." : "Refresh"}
+            Refresh
           </button>
           <button
             onClick={handleExport}
-            disabled={filteredLoans.length === 0}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={filteredLoans.length === 0 || apiLoading}
+            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <FiDownload className="w-4 h-4 mr-2" />
             Export CSV
@@ -506,163 +375,69 @@ const MyLoans = () => {
         </div>
       </div>
 
-      {/* Filters and Search */}
-      <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
-          {/* Search */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search by loan title or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-blue-100">
+              <FiFileText className="w-6 h-6 text-blue-600" />
             </div>
-          </div>
-
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="approved">Approved</option>
-              <option value="rejected">Rejected</option>
-            </select>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="amount-high">Amount: High to Low</option>
-              <option value="amount-low">Amount: Low to High</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Loans Table */}
-      <div className="dashboard-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">
-              Loan Applications ({filteredLoans.length})
-            </h3>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <FiFileText className="w-4 h-4" />
-              <span>Total: {userLoans.length} applications</span>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">
+                Total Applications
+              </h3>
+              <p className="text-2xl font-semibold text-gray-900">
+                {statistics.total}
+              </p>
             </div>
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-gray-500">Loading your loans...</p>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-yellow-100">
+              <FiCalendar className="w-6 h-6 text-yellow-600" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Pending</h3>
+              <p className="text-2xl font-semibold text-gray-900">
+                {statistics.pending}
+              </p>
+            </div>
           </div>
-        ) : filteredLoans.length === 0 ? (
-          <div className="p-8 text-center">
-            <FiFileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {userLoans.length === 0
-                ? "No Loan Applications"
-                : "No Matching Applications"}
-            </h3>
-            <p className="text-gray-500">
-              {userLoans.length === 0
-                ? "You haven't applied for any loans yet. Start by browsing our loan options."
-                : "Try adjusting your search or filter criteria."}
-            </p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100">
+              <FiFileText className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">Approved</h3>
+              <p className="text-2xl font-semibold text-gray-900">
+                {statistics.approved}
+              </p>
+            </div>
           </div>
-        ) : (
-          <div className="w-full">
-            <table className="w-full divide-y divide-gray-200 compact-table">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
-                    ID
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Loan Details
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                    Amount
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                    Status
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
-                    Date
-                  </th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredLoans.map((loan) => (
-                  <BorrowerLoanDataRow
-                    key={loan._id}
-                    loan={loan}
-                    onView={() => openViewModal(loan)}
-                    onCancel={() => openCancelModal(loan)}
-                    onPay={() => openPayModal(loan)}
-                    onViewPayment={() => handleViewPayment(loan.paymentId)}
-                  />
-                ))}
-              </tbody>
-            </table>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-primary/10">
+              <FiFileText className="w-6 h-6 text-primary" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-gray-500">
+                Total Amount
+              </h3>
+              <p className="text-2xl font-semibold text-gray-900">
+                ${statistics.totalAmount.toLocaleString()}
+              </p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Modals */}
-      {selectedLoan && (
-        <>
-          <DeleteModal
-            isOpen={isCancelOpen}
-            closeModal={() => setIsCancelOpen(false)}
-            refetch={refetch}
-            onConfirm={() => handleDelete(selectedLoan._id)}
-          />
-          <ViewMyLoanModal
-            isOpen={isViewOpen}
-            closeModal={() => setIsViewOpen(false)}
-            loan={selectedLoan}
-          />
-          <PayModal
-            isOpen={isPayOpen}
-            closeModal={() => setIsPayOpen(false)}
-            loan={selectedLoan}
-          />
-        </>
-      )}
-
-      <PaymentModal
-        isOpen={paymentModalOpen}
-        message={paymentMessage}
-        onClose={() => setPaymentModalOpen(false)}
-      />
-
-      <PaymentDetailModal
-        isOpen={paymentDetailModalOpen}
-        onClose={() => setPaymentDetailModalOpen(false)}
-        paymentData={paymentData}
-      />
-    </div>
-  );
-};
-
-export default MyLoans;
       {/* Filters and Search */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
@@ -732,17 +507,18 @@ export default MyLoans;
           <div className="text-center py-12">
             <FiFileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {userLoans.length === 0 ? "No Loan Applications" : "No Matching Loans"}
+              {userLoans.length === 0
+                ? "No Loan Applications"
+                : "No Matching Loans"}
             </h3>
             <p className="text-gray-500 mb-4">
-              {userLoans.length === 0 
+              {userLoans.length === 0
                 ? "You haven't applied for any loans yet. Start by browsing available loan options."
-                : "Try adjusting your search criteria or filters."
-              }
+                : "Try adjusting your search criteria or filters."}
             </p>
             {userLoans.length === 0 && (
               <button
-                onClick={() => window.location.href = '/all-loans'}
+                onClick={() => (window.location.href = "/all-loans")}
                 className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 Browse Loans
@@ -772,6 +548,7 @@ export default MyLoans;
                   onView={() => handleViewLoan(loan)}
                   onCancel={() => handleCancelLoan(loan)}
                   onPay={() => handlePayLoan(loan)}
+                  onViewPayment={() => handleViewPayment(loan.paymentId)}
                 />
               ))}
             </div>
@@ -791,36 +568,39 @@ export default MyLoans;
                     >
                       <FiChevronLeft className="w-5 h-5" />
                     </button>
-                    
+
                     <div className="flex space-x-1">
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNum;
-                        if (totalPages <= 5) {
-                          pageNum = i + 1;
-                        } else if (currentPage <= 3) {
-                          pageNum = i + 1;
-                        } else if (currentPage >= totalPages - 2) {
-                          pageNum = totalPages - 4 + i;
-                        } else {
-                          pageNum = currentPage - 2 + i;
+                      {Array.from(
+                        { length: Math.min(5, totalPages) },
+                        (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => goToPage(pageNum)}
+                              className={`px-3 py-1 text-sm rounded ${
+                                currentPage === pageNum
+                                  ? "bg-primary text-white"
+                                  : "text-gray-700 hover:bg-gray-100"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
                         }
-                        
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => goToPage(pageNum)}
-                            className={`px-3 py-1 text-sm rounded ${
-                              currentPage === pageNum
-                                ? 'bg-primary text-white'
-                                : 'text-gray-700 hover:bg-gray-100'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
+                      )}
                     </div>
-                    
+
                     <button
                       onClick={nextPage}
                       disabled={!hasNext}

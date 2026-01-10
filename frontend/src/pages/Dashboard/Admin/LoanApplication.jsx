@@ -17,18 +17,22 @@ const LoanApplication = () => {
 
   const axiosSecure = useAxiosSecure();
   const {
-    data: loans = [],
+    data: loansResponse,
     isLoading,
     refetch,
   } = useQuery({
     queryKey: ["loan"],
     queryFn: async () => {
       const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/apply-loans`
+        `${import.meta.env.VITE_API_URL}/admin/loans`
       );
       return result.data;
     },
   });
+
+  // Extract loans from the API response structure
+  const loans =
+    loansResponse?.data?.applications || loansResponse?.applications || [];
   if (isLoading) return <LoadingSpinner />;
   return (
     <>

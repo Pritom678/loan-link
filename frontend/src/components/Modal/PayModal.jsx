@@ -21,16 +21,37 @@ const PayModal = ({ isOpen, closeModal, loan }) => {
     setLoading(true);
 
     try {
+      console.log("Loan object:", loan);
+      console.log("User object:", user);
+      console.log("Attempting to create checkout session with:", {
+        loanId: loan._id,
+        customerEmail: user?.email,
+      });
+
       const { data } = await axiosSecure.post("/create-checkout-session", {
         loanId: loan._id,
         customerEmail: user?.email,
       });
 
+      console.log("Checkout session response:", data);
+
       // Redirect to Stripe checkout
-      window.location.href = data.url;
+      if (data.data?.url) {
+        window.location.href = data.data.url;
+      } else if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL received from server");
+      }
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to start payment.");
+      console.error("Payment error details:", err);
+      console.error("Error response:", err.response?.data);
+
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to start payment.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

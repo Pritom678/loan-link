@@ -8,23 +8,25 @@ const ApprovedLoanRow = ({
   refetch,
   setSelectedLoan,
   setIsModalOpen,
+  index,
 }) => {
   const axiosSecure = useAxiosSecure();
 
   const handleReject = async () => {
     try {
-      await axiosSecure.delete(`/approved-loans/${loan._id}`);
-      toast.success("Loan Rejected!");
+      await axiosSecure.patch(`/admin/loans/${loan._id}/status`, {
+        status: "Rejected",
+      });
+      toast.success("Loan Status Changed to Rejected!");
       refetch();
     } catch (err) {
-      toast.error("Delete failed", err);
+      toast.error("Status change failed", err);
     }
   };
 
   const handleView = async () => {
     try {
-      const res = await axiosSecure.get(`/approved-loans/${loan._id}`);
-      setSelectedLoan(res.data);
+      setSelectedLoan(loan);
       setIsModalOpen(true);
     } catch (err) {
       toast.error("Failed to load details", err);
@@ -32,38 +34,63 @@ const ApprovedLoanRow = ({
   };
 
   return (
-    <tr>
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900 ">{loan._id}</p>
+    <tr
+      className={`${
+        index % 2 === 0 ? "bg-white" : "bg-gray-50"
+      } hover:bg-amber-50 transition-colors duration-200`}
+    >
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-medium text-gray-900">
+          {loan._id?.slice(-8) || "N/A"}
+        </div>
       </td>
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900 ">
-          {loan.firstName} {loan.lastName}
-        </p>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-10 w-10">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">
+                {loan.firstName?.charAt(0) || "U"}
+              </span>
+            </div>
+          </div>
+          <div className="ml-4">
+            <div className="text-sm font-medium text-gray-900">
+              {loan.firstName} {loan.lastName}
+            </div>
+            <div className="text-sm text-gray-500">{loan.userEmail}</div>
+          </div>
+        </div>
       </td>
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900 ">{loan.loanAmount}</p>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-semibold text-gray-900">
+          ${loan.loanAmount?.toLocaleString() || "N/A"}
+        </div>
       </td>
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900 ">{loan.approvedAt}</p>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-gray-900">
+          {loan.approvedAt
+            ? new Date(loan.approvedAt).toLocaleDateString()
+            : "N/A"}
+        </div>
       </td>
-      <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <div className="flex items-center gap-3">
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center space-x-3">
           {/* Reject Button */}
           <button
             onClick={handleReject}
-            className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-md"
-            title="Reject"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200"
+            title="Change to Rejected"
           >
-            <FaTimes />
+            <FaTimes className="w-4 h-4" />
           </button>
+
           {/* View Button */}
           <button
             onClick={handleView}
-            className="p-2 bg-accent hover:bg-secondary text-white rounded-md"
+            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-lg text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors duration-200"
             title="View Details"
           >
-            <FaEye />
+            <FaEye className="w-4 h-4" />
           </button>
         </div>
       </td>

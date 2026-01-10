@@ -104,51 +104,51 @@ export const router = createBrowserRouter([
       {
         path: "add-loan",
         element: (
-          <ManagerRoute>
-            <PrivateRoute>
+          <PrivateRoute>
+            <ManagerRoute>
               <AddLoan />
-            </PrivateRoute>
-          </ManagerRoute>
+            </ManagerRoute>
+          </PrivateRoute>
         ),
       },
       {
         path: "pending-loans",
         element: (
-          <ManagerRoute>
-            <PrivateRoute>
+          <PrivateRoute>
+            <ManagerRoute>
               <PendingLoan />
-            </PrivateRoute>
-          </ManagerRoute>
+            </ManagerRoute>
+          </PrivateRoute>
         ),
       },
       {
         path: "approved-loans",
         element: (
-          <ManagerRoute>
-            <PrivateRoute>
+          <PrivateRoute>
+            <ManagerRoute>
               <ApprovedLoan />
-            </PrivateRoute>
-          </ManagerRoute>
+            </ManagerRoute>
+          </PrivateRoute>
         ),
       },
       {
         path: "manage-users",
         element: (
-          <AdminRoute>
-            <PrivateRoute>
+          <PrivateRoute>
+            <AdminRoute>
               <ManageUsers />
-            </PrivateRoute>
-          </AdminRoute>
+            </AdminRoute>
+          </PrivateRoute>
         ),
       },
       {
         path: "all-loan",
         element: (
-          <AdminRoute>
-            <PrivateRoute>
+          <PrivateRoute>
+            <AdminRoute>
               <AllLoans />
-            </PrivateRoute>
-          </AdminRoute>
+            </AdminRoute>
+          </PrivateRoute>
         ),
       },
       {
@@ -184,13 +184,13 @@ export const router = createBrowserRouter([
         element: <PaymentCancel />,
       },
       {
-        path: "manage-loans ",
+        path: "manage-loans",
         element: (
-          <ManagerRoute>
-            <PrivateRoute>
+          <PrivateRoute>
+            <ManagerRoute>
               <ManageLoans />
-            </PrivateRoute>
-          </ManagerRoute>
+            </ManagerRoute>
+          </PrivateRoute>
         ),
       },
     ],

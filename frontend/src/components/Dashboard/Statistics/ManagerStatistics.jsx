@@ -24,7 +24,7 @@ const ManagerStatistics = () => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
 
-  const { data: stats = {}, isLoading } = useQuery({
+  const { data: statsResponse = {}, isLoading } = useQuery({
     queryKey: ["manager-stats", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
@@ -35,6 +35,9 @@ const ManagerStatistics = () => {
     },
   });
 
+  // Extract stats from API response
+  const stats = statsResponse?.data || statsResponse || {};
+
   if (isLoading)
     return <div className="text-center mt-10">Loading stats...</div>;
 
@@ -42,27 +45,51 @@ const ManagerStatistics = () => {
     <div className="container mx-auto px-4 mt-12">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
         <StatCard
-          title="Loans Added"
-          value={stats.loansAdded || 0}
+          title="Loan Products"
+          value={stats.totalLoanProducts || 0}
           icon={FaPlusCircle}
-          fromColor="from-purple-500"
-          toColor="to-purple-400"
+          fromColor="from-amber-500"
+          toColor="to-amber-400"
         />
 
         <StatCard
-          title="Approved Loans"
-          value={stats.approved || 0}
+          title="Total Applications"
+          value={stats.totalApplications || 0}
           icon={FaCheckCircle}
-          fromColor="from-green-500"
-          toColor="to-green-400"
+          fromColor="from-orange-500"
+          toColor="to-orange-400"
         />
 
         <StatCard
-          title="Pending Loans"
-          value={stats.pending || 0}
+          title="Pending Applications"
+          value={stats.pendingApplications || 0}
           icon={FaHourglassHalf}
-          fromColor="from-yellow-500"
-          toColor="to-yellow-400"
+          fromColor="from-yellow-600"
+          toColor="to-yellow-500"
+        />
+
+        <StatCard
+          title="Approved Applications"
+          value={stats.approvedApplications || 0}
+          icon={FaCheckCircle}
+          fromColor="from-amber-600"
+          toColor="to-amber-500"
+        />
+
+        <StatCard
+          title="Total Loan Amount"
+          value={`${(stats.totalLoanAmount || 0).toLocaleString()}`}
+          icon={FaPlusCircle}
+          fromColor="from-orange-600"
+          toColor="to-orange-500"
+        />
+
+        <StatCard
+          title="Avg Interest Rate"
+          value={`${(stats.averageInterestRate || 0).toFixed(1)}%`}
+          icon={FaHourglassHalf}
+          fromColor="from-yellow-700"
+          toColor="to-yellow-600"
         />
       </div>
 

@@ -16,94 +16,114 @@ const ApprovedLoan = () => {
 
   const axiosSecure = useAxiosSecure();
   const {
-    data: loans = [],
+    data: loansResponse,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["loan"],
+    queryKey: ["approvedLoans"],
     queryFn: async () => {
       const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/approved-loans`
+        `${import.meta.env.VITE_API_URL}/admin/loans`
       );
       return result.data;
     },
   });
+
+  // Extract loans from the API response structure and filter for approved loans
+  const allLoans =
+    loansResponse?.data?.applications || loansResponse?.applications || [];
+  const loans = allLoans.filter(
+    (loan) => loan.status === "Approved" || loan.status === "approved"
+  );
   if (isLoading) return <LoadingSpinner />;
   return (
-    <>
-      <div className="container mx-auto px-4 sm:px-8">
-        <div className="py-8">
-          <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
-            <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
-              <table className="min-w-full leading-normal">
-                <thead>
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Approved Loan Applications
+          </h1>
+          <p className="text-gray-600">
+            View and manage approved loan applications
+          </p>
+        </div>
+
+        {/* Table Container */}
+        <div className="bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="bg-gradient-to-r from-amber-600 to-orange-600">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    Application ID
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    Borrower
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    Approved Date
+                  </th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {loans && loans.length > 0 ? (
+                  loans.map((loan, index) => (
+                    <ApprovedLoanRow
+                      key={loan._id}
+                      loan={loan}
+                      refetch={refetch}
+                      setSelectedLoan={setSelectedLoan}
+                      setIsModalOpen={setIsModalOpen}
+                      index={index}
+                    />
+                  ))
+                ) : (
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal"
-                    >
-                      Id
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal"
-                    >
-                      Borrower
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal"
-                    >
-                      Amount
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal"
-                    >
-                      Approved Date
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal"
-                    >
-                      Action
-                    </th>
+                    <td colSpan="5" className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mb-4">
+                          <svg
+                            className="w-8 h-8 text-amber-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          No Approved Applications
+                        </h3>
+                        <p className="text-gray-500">
+                          There are no approved loan applications at the moment.
+                        </p>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {loans && loans.length > 0 ? (
-                    loans.map((loan) => (
-                      <ApprovedLoanRow
-                        key={loan._id}
-                        loan={loan}
-                        refetch={refetch}
-                        setSelectedLoan={setSelectedLoan}
-                        setIsModalOpen={setIsModalOpen}
-                      />
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="5"
-                        className="text-center py-4 text-gray-500"
-                      >
-                        No Approved loans found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              {isModalOpen && (
-                <ViewApprovedLoanModal
-                  loan={selectedLoan}
-                  closeModal={closeModal}
-                />
-              )}
-            </div>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
+
+        {/* Modal */}
+        {isModalOpen && (
+          <ViewApprovedLoanModal loan={selectedLoan} closeModal={closeModal} />
+        )}
       </div>
-    </>
+    </div>
   );
 };
 

@@ -8,27 +8,27 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
   const axiosSecure = useAxiosSecure();
 
   const handleDelete = async () => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "Do you really want to delete this loan? This action cannot be undone.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, delete it!",
-    cancelButtonText: "Cancel",
-  });
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this loan? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
 
-  if (result.isConfirmed) {
-    try {
-      await axiosSecure.delete(`/loans/${loan._id}`);
-      Swal.fire("Deleted!", "The loan has been deleted.", "success");
-      refetch();
-    } catch (error) {
-      Swal.fire("Error!", "Failed to delete the loan.", error);
+    if (result.isConfirmed) {
+      try {
+        await axiosSecure.delete(`/loans/${loan._id}`);
+        Swal.fire("Deleted!", "The loan has been deleted.", "success");
+        refetch();
+      } catch (error) {
+        Swal.fire("Error!", "Failed to delete the loan.", error);
+      }
     }
-  }
-};
+  };
 
   const enabled = loan.availability === "available";
 
@@ -72,7 +72,7 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
           checked={enabled}
           onChange={handleToggle}
           className={`${
-            enabled ? "bg-green-500" : "bg-gray-300"
+            enabled ? "bg-amber-500" : "bg-gray-300"
           } relative inline-flex items-center h-7 w-14 rounded-full transition-colors duration-300 focus:outline-none shadow-inner`}
         >
           <span
@@ -100,7 +100,7 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
       <td className="px-5 py-4 flex gap-2">
         {/* Edit Button */}
         <button
-          className="flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg shadow-md transition"
+          className="flex items-center gap-1 px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-sm rounded-lg shadow-md transition"
           onClick={() => onEdit(loan)} // trigger modal
         >
           <FaEdit className="text-white" />
@@ -109,7 +109,7 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
 
         {/* Delete Button */}
         <button
-          className="flex items-center gap-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg shadow-md transition"
+          className="flex items-center gap-1 px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-lg shadow-md transition"
           onClick={handleDelete}
         >
           <FaTrash className="text-white" />

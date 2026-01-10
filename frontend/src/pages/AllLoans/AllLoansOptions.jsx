@@ -17,7 +17,7 @@ const AllLoansOptions = () => {
   const [interestRange, setInterestRange] = useState("");
   const loansPerPage = 8;
 
-  const { data: loans = [], isLoading } = useQuery({
+  const { data: loansResponse, isLoading } = useQuery({
     queryKey: ["loans"],
     queryFn: async () => {
       const result = await axiosSecure(`${import.meta.env.VITE_API_URL}/loans`);
@@ -25,15 +25,23 @@ const AllLoansOptions = () => {
     },
   });
 
+  // Extract loans from the API response structure
+  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
+
+  // Ensure loans is always an array
+  const safeLoans = Array.isArray(loans) ? loans : [];
+
   // Get unique categories for filter dropdown
-  const categories = [...new Set(loans.map((loan) => loan.category))];
+  const categories = [
+    ...new Set(safeLoans.map((loan) => loan.category).filter(Boolean)),
+  ];
 
   // Filter and sort loans
   const filteredAndSortedLoans = useMemo(() => {
-    let filtered = loans.filter((loan) => {
+    let filtered = safeLoans.filter((loan) => {
       const matchesSearch =
-        loan.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        loan.category.toLowerCase().includes(searchTerm.toLowerCase());
+        loan.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        loan.category?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory =
         !selectedCategory || loan.category === selectedCategory;
 
@@ -43,7 +51,7 @@ const AllLoansOptions = () => {
         const interest =
           typeof loan.interest === "number"
             ? loan.interest
-            : parseFloat(loan.interest.replace("%", ""));
+            : parseFloat((loan.interest || "0").toString().replace("%", ""));
 
         switch (interestRange) {
           case "low":
@@ -70,28 +78,28 @@ const AllLoansOptions = () => {
             const aInterest =
               typeof a.interest === "number"
                 ? a.interest
-                : parseFloat(a.interest.replace("%", ""));
+                : parseFloat((a.interest || "0").toString().replace("%", ""));
             const bInterest =
               typeof b.interest === "number"
                 ? b.interest
-                : parseFloat(b.interest.replace("%", ""));
+                : parseFloat((b.interest || "0").toString().replace("%", ""));
             return aInterest - bInterest;
           case "interest-high":
             const aInterestHigh =
               typeof a.interest === "number"
                 ? a.interest
-                : parseFloat(a.interest.replace("%", ""));
+                : parseFloat((a.interest || "0").toString().replace("%", ""));
             const bInterestHigh =
               typeof b.interest === "number"
                 ? b.interest
-                : parseFloat(b.interest.replace("%", ""));
+                : parseFloat((b.interest || "0").toString().replace("%", ""));
             return bInterestHigh - aInterestHigh;
           case "amount-low":
-            return a.limit - b.limit;
+            return (a.limit || 0) - (b.limit || 0);
           case "amount-high":
-            return b.limit - a.limit;
+            return (b.limit || 0) - (a.limit || 0);
           case "title":
-            return a.title.localeCompare(b.title);
+            return (a.title || "").localeCompare(b.title || "");
           default:
             return 0;
         }
@@ -99,7 +107,7 @@ const AllLoansOptions = () => {
     }
 
     return filtered;
-  }, [loans, searchTerm, selectedCategory, sortBy, interestRange]);
+  }, [safeLoans, searchTerm, selectedCategory, sortBy, interestRange]);
 
   // Reset to first page when filters change
   React.useEffect(() => {
