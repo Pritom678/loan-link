@@ -16,25 +16,17 @@ const PendingLoan = () => {
 
   const axiosSecure = useAxiosSecure();
   const {
-    data: loansResponse,
+    data: loans,
     isLoading,
     refetch,
   } = useQuery({
     queryKey: ["pendingLoans"],
     queryFn: async () => {
-      const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/admin/loans`
-      );
-      return result.data;
+      const result = await axiosSecure(`/pending-loans`);
+      return result.data; // Backend returns array directly
     },
   });
 
-  // Extract loans from the API response structure and filter for pending loans
-  const allLoans =
-    loansResponse?.data?.applications || loansResponse?.applications || [];
-  const loans = allLoans.filter(
-    (loan) => loan.status === "Pending" || loan.status === "pending"
-  );
   if (isLoading) return <LoadingSpinner />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">

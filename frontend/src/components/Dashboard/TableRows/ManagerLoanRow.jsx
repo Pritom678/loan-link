@@ -22,8 +22,10 @@ const ManagerLoanRow = ({ loan, removeLoanFromTable, refetch, index }) => {
       // Remove the deleted loan from table dynamically
       if (removeLoanFromTable) removeLoanFromTable(loanId);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete the loan");
+      console.error("Delete loan error:", err);
+      const errorMessage =
+        err.response?.data?.message || "Failed to delete the loan";
+      toast.error(errorMessage);
     }
   };
 

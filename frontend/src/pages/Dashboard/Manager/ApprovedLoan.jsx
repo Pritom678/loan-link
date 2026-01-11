@@ -16,25 +16,17 @@ const ApprovedLoan = () => {
 
   const axiosSecure = useAxiosSecure();
   const {
-    data: loansResponse,
+    data: loans,
     isLoading,
     refetch,
   } = useQuery({
     queryKey: ["approvedLoans"],
     queryFn: async () => {
-      const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/admin/loans`
-      );
-      return result.data;
+      const result = await axiosSecure(`/approved-loans`);
+      return result.data; // Backend returns array directly
     },
   });
 
-  // Extract loans from the API response structure and filter for approved loans
-  const allLoans =
-    loansResponse?.data?.applications || loansResponse?.applications || [];
-  const loans = allLoans.filter(
-    (loan) => loan.status === "Approved" || loan.status === "approved"
-  );
   if (isLoading) return <LoadingSpinner />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">

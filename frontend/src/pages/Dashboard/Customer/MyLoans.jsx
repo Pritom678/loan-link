@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import BorrowerLoanDataRow from "../../../components/Dashboard/TableRows/BorrowerLoanDataRow";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
@@ -30,6 +31,7 @@ const MyLoans = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const { loading: apiLoading, execute } = useApi();
+  const queryClient = useQueryClient();
 
   // Modal states
   const [selectedLoan, setSelectedLoan] = useState(null);
@@ -256,7 +258,7 @@ const MyLoans = () => {
       axiosSecure
         .get(`/payment-details/${sessionId}`)
         .then(({ data }) => {
-          console.log(data);
+          console.log("Payment details:", data);
           const paymentId = data.id;
 
           // Step 2: Save paymentId in backend
@@ -267,15 +269,26 @@ const MyLoans = () => {
         .then(() => {
           setPaymentMessage("Loan fee paid successfully!");
           setPaymentModalOpen(true);
+          // Force refetch and invalidate cache
           refetch();
+          // Also invalidate the query cache to ensure fresh data
+          queryClient.invalidateQueries({
+            queryKey: ["userLoans", user?.email],
+          });
+          // Clear URL parameters
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          );
         })
         .catch((err) => {
-          console.error(err);
+          console.error("Payment processing error:", err);
           setPaymentMessage("Failed to record payment");
           setPaymentModalOpen(true);
         });
     }
-  }, [axiosSecure, refetch]);
+  }, [axiosSecure, refetch, queryClient, user?.email]);
 
   const handleDelete = async (loanId) => {
     if (!loanId) return;

@@ -1,6 +1,7 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useState } from "react";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
+import toast from "react-hot-toast";
 
 const UpdateUserRoleModal = ({ isOpen, closeModal, user, refetch }) => {
   const [updatedRole, setUpdatedRole] = useState(user.role);
@@ -8,16 +9,17 @@ const UpdateUserRoleModal = ({ isOpen, closeModal, user, refetch }) => {
 
   const handleRoleUpdate = async () => {
     try {
-      const res = await axiosSecure.patch(
-        `${import.meta.env.VITE_API_URL}/user/role/${user._id}`,
-        { role: updatedRole }
-      );
+      const res = await axiosSecure.patch(`/user/role/${user._id}`, {
+        role: updatedRole,
+      });
       if (res.data.success) {
+        toast.success("User role updated successfully!");
         refetch(); // refresh UI
         closeModal();
       }
     } catch (err) {
       console.error(err);
+      toast.error("Failed to update user role!");
     }
   };
 

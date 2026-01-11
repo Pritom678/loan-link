@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { imageUpload } from "../../utilities";
 import useAuth from "../../hooks/useAuth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../Shared/LoadingSpinner";
@@ -11,6 +11,7 @@ import { TbCoin } from "react-icons/tb";
 const AddLoanForm = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
 
   const {
     isPending,
@@ -19,11 +20,14 @@ const AddLoanForm = () => {
     reset: mutationReset,
   } = useMutation({
     mutationFn: async (payload) => {
-      await axiosSecure.post(`${import.meta.env.VITE_API_URL}/loans`, payload);
+      await axiosSecure.post(`/loans`, payload);
     },
     onSuccess: (data) => {
       console.log(data);
       toast.success("Loan Added Successfully");
+      // Invalidate loan queries to refresh the UI
+      queryClient.invalidateQueries(["loans"]);
+      queryClient.invalidateQueries(["allLoans"]);
       //navigate to my inventory
       mutationReset();
     },
@@ -88,7 +92,7 @@ const AddLoanForm = () => {
   if (isPending) return <LoadingSpinner />;
   if (isError) return <ErrorPage />;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+    <div className="min-h-screen bg-linear-to-br from-amber-50 to-orange-50 py-8">
       <div className="container mx-auto px-4">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
@@ -348,7 +352,7 @@ const AddLoanForm = () => {
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full py-4 px-6 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full py-4 px-6 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {isPending ? (
                     <div className="flex items-center justify-center">

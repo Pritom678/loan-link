@@ -6,16 +6,17 @@ import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
 const ManageUsers = () => {
   const axiosSecure = useAxiosSecure();
   const {
-    data: users = [],
+    data: users,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["user"],
+    queryKey: ["users"],
     queryFn: async () => {
-      const result = await axiosSecure(`${import.meta.env.VITE_API_URL}/user`);
-      return result.data;
+      const result = await axiosSecure(`/user`);
+      return result.data; // Backend returns array directly
     },
   });
+
   if (isLoading) return <LoadingSpinner />;
 
   return (
@@ -67,7 +68,7 @@ const ManageUsers = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="5"
+                        colSpan="4"
                         className="text-center py-4 text-gray-500"
                       >
                         No User found.

@@ -11,16 +11,9 @@ const LoanApplicationRow = ({
 }) => {
   const axiosSecure = useAxiosSecure();
 
-
-
-  const handleView = async () => {
-    try {
-      const res = await axiosSecure.get(`/apply-loans/${loan._id}`);
-      setSelectedLoan(res.data);
-      setIsModalOpen(true);
-    } catch (err) {
-      toast.error("Failed to load details", err);
-    }
+  const handleView = () => {
+    setSelectedLoan(loan);
+    setIsModalOpen(true);
   };
 
   return (
@@ -29,9 +22,7 @@ const LoanApplicationRow = ({
         <p className="text-gray-900 ">{loan._id}</p>
       </td>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-        <p className="text-gray-900 ">
-          {loan.userEmail}
-        </p>
+        <p className="text-gray-900 ">{loan.userEmail}</p>
       </td>
       <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
         <p className="text-gray-900 ">

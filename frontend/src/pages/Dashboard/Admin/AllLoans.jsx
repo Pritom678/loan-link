@@ -8,19 +8,19 @@ import EditLoanModal from "../../../components/Modal/EditLoanModal";
 const AllLoans = () => {
   const axiosSecure = useAxiosSecure();
   const {
-    data: loansResponse,
+    data: loans,
     isLoading,
     refetch,
+    error,
   } = useQuery({
     queryKey: ["allLoans"],
     queryFn: async () => {
-      const { data } = await axiosSecure.get(`/loans`);
-      return data;
+      const { data } = await axiosSecure.get(`/loans/all`);
+      return data; // Backend returns array directly
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
-
-  // Extract loans from the API response structure
-  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
 
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,6 +36,20 @@ const AllLoans = () => {
   };
 
   if (isLoading) return <LoadingSpinner />;
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 sm:px-8">
+        <div className="py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong>Error loading loans:</strong> {error.message}
+            <br />
+            <small>Check console for more details</small>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-8">
@@ -55,7 +69,7 @@ const AllLoans = () => {
                 </tr>
               </thead>
               <tbody>
-                {loans.length > 0 ? (
+                {loans && loans.length > 0 ? (
                   loans.map((loan) => (
                     <AllLoanData
                       key={loan._id}

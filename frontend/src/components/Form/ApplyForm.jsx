@@ -15,9 +15,7 @@ const ApplyForm = () => {
   const { data: loanDetails = {}, isLoading: loanLoading } = useQuery({
     queryKey: ["loanDetails", id],
     queryFn: async () => {
-      const res = await axiosSecure.get(
-        `${import.meta.env.VITE_API_URL}/loans/${id}`
-      );
+      const res = await axiosSecure.get(`/loans/${id}`);
       return res.data;
     },
   });
@@ -29,10 +27,7 @@ const ApplyForm = () => {
     reset: mutationReset,
   } = useMutation({
     mutationFn: async (payload) => {
-      await axiosSecure.post(
-        `${import.meta.env.VITE_API_URL}/apply-loans`,
-        payload
-      );
+      await axiosSecure.post(`/apply-loans`, payload);
     },
     onSuccess: (data) => {
       console.log(data);

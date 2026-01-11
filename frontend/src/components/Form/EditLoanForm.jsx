@@ -15,7 +15,7 @@ const EditLoanForm = ({ loan, closeModal }) => {
       interest: loan?.interest || "",
       category: loan?.category || "",
       image: loan?.image || "",
-      maxLoan: loan?.maxLoan || "",
+      maxLoan: loan?.limit || "",
     },
   });
 
@@ -27,29 +27,39 @@ const EditLoanForm = ({ loan, closeModal }) => {
       interest: loan?.interest || "",
       category: loan?.category || "",
       image: loan?.image || "",
-      maxLoan: loan?.maxLoan || "",
+      maxLoan: loan?.limit || "",
     });
   }, [loan, reset]);
 
   const mutation = useMutation({
     mutationFn: async (updatedData) => {
-      const { data } = await axiosSecure.put(
-        `/loans/${loan._id}`,
-        updatedData
-      );
+      const { data } = await axiosSecure.put(`/loans/${loan._id}`, updatedData);
       return data;
     },
-    onSuccess: () => {
-      toast.success("Loan updated successfully!");
-      queryClient.invalidateQueries(["loans"]);
+    onSuccess: (data) => {
+      toast.success(data.message || "Loan updated successfully!");
+      // Invalidate and refetch the loans data
+      queryClient.invalidateQueries({ queryKey: ["allLoans"] });
       closeModal();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Update error:", error);
       toast.error("Failed to update loan!");
     },
   });
 
-  const onSubmit = (data) => mutation.mutate(data);
+  const onSubmit = (data) => {
+    // Map form data to match backend expectations
+    const mappedData = {
+      title: data.title,
+      description: data.description,
+      interest: data.interest,
+      category: data.category,
+      image: data.image,
+      limit: data.maxLoan, // Map maxLoan to limit
+    };
+    mutation.mutate(mappedData);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -101,7 +111,9 @@ const EditLoanForm = ({ loan, closeModal }) => {
 
       {/* Image */}
       <div>
-        <label className="block mb-1 font-medium text-gray-700">Image URL</label>
+        <label className="block mb-1 font-medium text-gray-700">
+          Image URL
+        </label>
         <input
           type="text"
           {...register("image")}

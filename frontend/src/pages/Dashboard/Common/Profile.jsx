@@ -23,12 +23,20 @@ const Profile = () => {
 
   const handleSaveProfile = async (profileData) => {
     try {
+      // Validate data before sending
+      const updateData = {
+        displayName: profileData.displayName?.trim() || user?.displayName || "",
+        bio: profileData.bio?.trim() || "",
+        profilePicture: profileData.profilePicture || "",
+      };
+
+      // Ensure displayName is not empty
+      if (!updateData.displayName) {
+        throw new Error("Display name is required");
+      }
+
       // Save profile data to backend
-      const response = await axiosSecure.put(`/user/${user.email}`, {
-        displayName: profileData.displayName,
-        bio: profileData.bio,
-        profilePicture: profileData.profilePicture,
-      });
+      const response = await axiosSecure.put(`/user/${user.email}`, updateData);
 
       if (response.data.success) {
         // Refetch user info to update the UI
@@ -51,17 +59,38 @@ const Profile = () => {
     } catch (error) {
       console.error("Error saving profile:", error);
 
+      // Extract specific error message from response
+      let errorMessage = "Failed to save profile. Please try again.";
+
+      if (
+        error.response?.data?.errors &&
+        Array.isArray(error.response.data.errors)
+      ) {
+        // Handle validation errors
+        errorMessage = error.response.data.errors
+          .map((err) => err.msg)
+          .join(", ");
+      } else if (error.response?.data?.message) {
+        // Handle general error message
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        // Handle client-side errors
+        errorMessage = error.message;
+      }
+
       // Show error message
       const errorDiv = document.createElement("div");
       errorDiv.className =
         "fixed top-4 right-4 bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg z-50";
-      errorDiv.textContent = "Failed to save profile. Please try again.";
+      errorDiv.textContent = errorMessage;
       document.body.appendChild(errorDiv);
 
-      // Remove after 3 seconds
+      // Remove after 5 seconds for longer error messages
       setTimeout(() => {
-        document.body.removeChild(errorDiv);
-      }, 3000);
+        if (document.body.contains(errorDiv)) {
+          document.body.removeChild(errorDiv);
+        }
+      }, 5000);
 
       throw error;
     }

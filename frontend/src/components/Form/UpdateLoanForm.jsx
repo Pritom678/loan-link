@@ -17,19 +17,20 @@ const UpdateLoanForm = ({ loan, closeModal }) => {
 
   const mutation = useMutation({
     mutationFn: async (updatedData) => {
-      const { data } = await axiosSecure.put(
-        `${import.meta.env.VITE_API_URL}/loans/${loan._id}`,
-        updatedData
-      );
+      const { data } = await axiosSecure.put(`/loans/${loan._id}`, updatedData);
       return data;
     },
     onSuccess: () => {
       toast.success("Loan updated successfully!");
       queryClient.invalidateQueries(["loans"]);
+      queryClient.invalidateQueries(["allLoans"]);
       closeModal();
     },
-    onError: () => {
-      toast.error("Failed to update loan!");
+    onError: (error) => {
+      console.error("Update loan error:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to update loan!";
+      toast.error(errorMessage);
     },
   });
 

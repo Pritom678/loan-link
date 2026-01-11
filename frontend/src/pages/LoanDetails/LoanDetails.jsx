@@ -18,9 +18,7 @@ const LoanDetails = () => {
   const { data: loan = {}, isLoading } = useQuery({
     queryKey: ["loan", id],
     queryFn: async () => {
-      const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/loans/${id}`
-      );
+      const result = await axiosSecure(`/loans/${id}`);
       return result.data;
     },
   });

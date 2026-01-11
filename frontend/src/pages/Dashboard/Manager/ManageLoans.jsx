@@ -2,35 +2,67 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ManagerLoanRow from "../../../components/Dashboard/TableRows/ManagerLoanRow";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import useAuth from "../../../hooks/useAuth";
 import LoadingSpinner from "../../../components/Shared/LoadingSpinner";
 
 const ManageLoans = () => {
   const axiosSecure = useAxiosSecure();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
     data: loansResponse,
     isLoading,
     refetch,
+    error,
   } = useQuery({
     queryKey: ["loans"],
     queryFn: async () => {
-      const result = await axiosSecure(`${import.meta.env.VITE_API_URL}/loans`);
+      const result = await axiosSecure(`/loans`);
       return result.data;
     },
   });
 
   // Extract loans from the API response structure
-  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
+  const allLoans = Array.isArray(loansResponse) ? loansResponse : [];
+
+  // Filter loans by current manager's email
+  const managerLoans = allLoans.filter(
+    (loan) => loan.manager?.email === user?.email
+  );
 
   // Filter loans based on search term (title or category)
-  const filteredLoans = loans.filter(
+  const filteredLoans = managerLoans.filter(
     (loan) =>
       loan.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       loan.category?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) return <LoadingSpinner />;
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-red-200 p-8 text-center">
+            <h3 className="text-lg font-medium text-red-900 mb-2">
+              Error Loading Loans
+            </h3>
+            <p className="text-red-700 mb-4">
+              Failed to fetch loans from the server.
+            </p>
+            <p className="text-sm text-red-600">Error: {error.message}</p>
+            <button
+              onClick={() => refetch()}
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50 py-8">
@@ -102,11 +134,23 @@ const ManageLoans = () => {
                         <h3 className="text-lg font-medium text-gray-900 mb-2">
                           No Loan Products Found
                         </h3>
-                        <p className="text-gray-500">
+                        <p className="text-gray-500 mb-4">
                           {searchTerm
                             ? "No loans match your search criteria."
-                            : "You haven't created any loan products yet."}
+                            : managerLoans.length === 0
+                            ? "You haven't created any loan products yet. Create your first loan product to get started."
+                            : "No loans found."}
                         </p>
+                        {managerLoans.length === 0 && (
+                          <button
+                            onClick={() =>
+                              (window.location.href = "/dashboard/add-loan")
+                            }
+                            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+                          >
+                            Create Loan Product
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

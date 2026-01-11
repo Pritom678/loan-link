@@ -17,16 +17,24 @@ const AllLoansOptions = () => {
   const [interestRange, setInterestRange] = useState("");
   const loansPerPage = 8;
 
-  const { data: loansResponse, isLoading } = useQuery({
+  const {
+    data: loansResponse,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["loans"],
     queryFn: async () => {
-      const result = await axiosSecure(`${import.meta.env.VITE_API_URL}/loans`);
+      const result = await axiosSecure(`/loans`);
       return result.data;
     },
   });
 
   // Extract loans from the API response structure
-  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
+  const loans = Array.isArray(loansResponse) ? loansResponse : [];
+
+  if (error) {
+    console.error("AllLoansOptions - Error:", error);
+  }
 
   // Ensure loans is always an array
   const safeLoans = Array.isArray(loans) ? loans : [];
@@ -261,7 +269,13 @@ const AllLoansOptions = () => {
       </div>
 
       {/* Loan Cards */}
-      {currentLoans && currentLoans.length > 0 ? (
+      {error ? (
+        <div className="text-center text-red-500 py-20">
+          <h3 className="text-lg font-medium mb-2">Error Loading Loans</h3>
+          <p>Failed to fetch loans from the server. Please try again later.</p>
+          <p className="text-sm mt-2">Error: {error.message}</p>
+        </div>
+      ) : currentLoans && currentLoans.length > 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -282,9 +296,12 @@ const AllLoansOptions = () => {
         </motion.div>
       ) : (
         <div className="text-center text-gray-500 py-20">
+          <h3 className="text-lg font-medium mb-2">
+            No Loan Options Available
+          </h3>
           {searchTerm || selectedCategory || interestRange
             ? "No loans match your search criteria. Try adjusting your filters."
-            : "No loan options available right now. Please check back later."}
+            : "No loan options are currently available. Please check back later or contact support."}
         </div>
       )}
 

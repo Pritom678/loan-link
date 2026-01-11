@@ -77,17 +77,33 @@ const EditProfileModal = ({ isOpen, closeModal, onSave, userInfo }) => {
     e.preventDefault();
 
     // Validate required fields
-    if (!formData.displayName.trim()) {
+    const displayName = formData.displayName.trim();
+    if (!displayName) {
       alert("Display name is required");
+      return;
+    }
+
+    if (displayName.length < 2 || displayName.length > 50) {
+      alert("Display name must be between 2 and 50 characters");
+      return;
+    }
+
+    if (formData.bio.length > 500) {
+      alert("Bio cannot exceed 500 characters");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Here you would typically upload the image to a service like Firebase Storage
-      // For now, we'll just pass the data to the parent component
-      await onSave(formData);
+      // Prepare clean data
+      const cleanData = {
+        displayName: displayName,
+        bio: formData.bio.trim(),
+        profilePicture: formData.profilePicture || "",
+      };
+
+      await onSave(cleanData);
       closeModal();
     } catch (error) {
       console.error("Error saving profile:", error);

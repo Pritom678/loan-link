@@ -3,9 +3,11 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { Switch } from "@headlessui/react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AllLoanData = ({ loan, refetch, onEdit }) => {
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
 
   const handleDelete = async () => {
     const result = await Swal.fire({
@@ -21,18 +23,42 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
 
     if (result.isConfirmed) {
       try {
-        await axiosSecure.delete(`/loans/${loan._id}`);
-        Swal.fire("Deleted!", "The loan has been deleted.", "success");
-        refetch();
+        const response = await axiosSecure.delete(`/loans/${loan._id}`);
+
+        if (response.data.message) {
+          Swal.fire("Deleted!", response.data.message, "success");
+          // Invalidate and refetch the loans data
+          await queryClient.invalidateQueries({ queryKey: ["allLoans"] });
+          refetch();
+        } else {
+          Swal.fire(
+            "Error!",
+            "Failed to delete the loan - invalid response.",
+            "error"
+          );
+        }
       } catch (error) {
-        Swal.fire("Error!", "Failed to delete the loan.", error);
+        console.error("Delete error:", error);
+        Swal.fire(
+          "Error!",
+          `Failed to delete the loan: ${
+            error.response?.data?.message || error.message
+          }`,
+          "error"
+        );
       }
     }
   };
 
-  const enabled = loan.availability === "available";
+  const enabled = loan.availability === "available" || !loan.availability; // Default to available if not set
 
   const handleToggle = async () => {
+    console.log(
+      "Toggle clicked for loan:",
+      loan._id,
+      "Current availability:",
+      loan.availability
+    );
     try {
       const res = await axiosSecure.patch(
         `/loans/toggle-availability/${loan._id}`,
@@ -41,15 +67,25 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
         }
       );
 
+      console.log("Toggle response:", res.data);
       if (res.data.success) {
         toast.success(
-          `Updated: ${enabled ? "Hidden from home" : "Visible on home"}`
+          res.data.message ||
+            `Updated: ${enabled ? "Hidden from home" : "Visible on home"}`
         );
+        // Invalidate and refetch the loans data
+        await queryClient.invalidateQueries({ queryKey: ["allLoans"] });
         refetch();
+      } else {
+        console.error("Toggle failed - no success flag in response");
+        toast.error("Update failed - invalid response!");
       }
     } catch (err) {
-      console.error(err);
-      toast.error("Update failed!");
+      console.error("Toggle error:", err);
+      console.error("Error response:", err.response?.data);
+      toast.error(
+        `Update failed: ${err.response?.data?.message || err.message}`
+      );
     }
   };
 

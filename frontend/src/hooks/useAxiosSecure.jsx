@@ -17,8 +17,15 @@ const useAxiosSecure = () => {
     const requestInterceptor = instance.interceptors.request.use(
       async (config) => {
         if (user) {
-          const token = await user.getIdToken(); // <- get Firebase token
-          config.headers.Authorization = `Bearer ${token}`;
+          try {
+            const token = await user.getIdToken(); // <- get Firebase token
+            config.headers.Authorization = `Bearer ${token}`;
+            console.log("Request with auth token:", config.url);
+          } catch (error) {
+            console.error("Failed to get Firebase token:", error);
+          }
+        } else {
+          console.log("No user found for request:", config.url);
         }
         return config;
       }
@@ -27,15 +34,27 @@ const useAxiosSecure = () => {
     const responseInterceptor = instance.interceptors.response.use(
       (res) => res,
       async (err) => {
-        // Don't auto-logout for role-related requests as they might just mean insufficient permissions
+        console.error(
+          "API Error:",
+          err.response?.status,
+          err.response?.data,
+          "URL:",
+          err.config?.url
+        );
+
+        // Don't auto-logout for role-related requests or loan management requests
+        // as they might just mean insufficient permissions
         const isRoleRequest =
           err?.config?.url?.includes("/user/role") ||
-          err?.config?.url?.includes("-stats");
+          err?.config?.url?.includes("-stats") ||
+          err?.config?.url?.includes("/loans/");
 
         if (
-          (err?.response?.status === 401 || err?.response?.status === 403) &&
+          (err?.response?.status === 401 ||
+            (err?.response?.status === 403 && !isRoleRequest)) &&
           !isRoleRequest
         ) {
+          console.log("Authentication failed, logging out");
           await logOut();
           navigate("/login");
         }

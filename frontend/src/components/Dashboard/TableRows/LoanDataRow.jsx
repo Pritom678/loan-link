@@ -15,7 +15,7 @@ const LoanDataRow = ({
 
   const handleApprove = async () => {
     try {
-      await axiosSecure.patch(`/admin/loans/${loan._id}/status`, {
+      await axiosSecure.patch(`/apply-loans/${loan._id}`, {
         status: "Approved",
       });
       toast.success("Loan Approved!");
@@ -27,7 +27,7 @@ const LoanDataRow = ({
 
   const handleReject = async () => {
     try {
-      await axiosSecure.patch(`/admin/loans/${loan._id}/status`, {
+      await axiosSecure.patch(`/apply-loans/${loan._id}`, {
         status: "Rejected",
       });
       toast.success("Loan Rejected!");

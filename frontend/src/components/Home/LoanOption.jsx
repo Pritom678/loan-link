@@ -8,18 +8,25 @@ import { useQuery } from "@tanstack/react-query";
 const LoanOption = () => {
   const axiosSecure = useAxiosSecure();
 
-  const { data: loansResponse, isLoading } = useQuery({
+  const {
+    data: loansResponse,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["loans"],
     queryFn: async () => {
-      const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/loans?limit=6`
-      );
+      const result = await axiosSecure(`/loans?limit=6`);
       return result.data;
     },
   });
 
   // Extract loans from the API response structure
-  const loans = loansResponse?.data?.loans || loansResponse?.loans || [];
+  const loans = Array.isArray(loansResponse) ? loansResponse : [];
+  console.log("Home LoanOption - Processed loans:", loans);
+
+  if (error) {
+    console.error("Home LoanOption - Error:", error);
+  }
 
   if (isLoading) {
     return (
@@ -50,13 +57,27 @@ const LoanOption = () => {
       </div>
 
       {/* Loan Cards */}
-      {loans && loans.length > 0 ? (
+      {error ? (
+        <div className="pt-12 text-center text-red-500">
+          <h3 className="text-lg font-medium mb-2">Error Loading Loans</h3>
+          <p>Failed to fetch loans. Please try again later.</p>
+        </div>
+      ) : loans && loans.length > 0 ? (
         <div className="pt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           {loans.map((loan) => (
             <Card key={loan._id} loan={loan} />
           ))}
         </div>
-      ) : null}
+      ) : (
+        <div className="pt-12 text-center text-gray-500">
+          <h3 className="text-lg font-medium mb-2">
+            No Loan Options Available
+          </h3>
+          <p>
+            We're currently updating our loan products. Please check back soon!
+          </p>
+        </div>
+      )}
     </Container>
   );
 };

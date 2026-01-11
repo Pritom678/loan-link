@@ -17,22 +17,17 @@ const LoanApplication = () => {
 
   const axiosSecure = useAxiosSecure();
   const {
-    data: loansResponse,
+    data: loans,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["loan"],
+    queryKey: ["loanApplications"],
     queryFn: async () => {
-      const result = await axiosSecure(
-        `${import.meta.env.VITE_API_URL}/admin/loans`
-      );
-      return result.data;
+      const result = await axiosSecure(`/apply-loans`);
+      return result.data; // Backend returns array directly
     },
   });
 
-  // Extract loans from the API response structure
-  const loans =
-    loansResponse?.data?.applications || loansResponse?.applications || [];
   if (isLoading) return <LoadingSpinner />;
   return (
     <>
@@ -101,7 +96,7 @@ const LoanApplication = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="5"
+                        colSpan="7"
                         className="text-center py-4 text-gray-500"
                       >
                         No Loan Applications Found.

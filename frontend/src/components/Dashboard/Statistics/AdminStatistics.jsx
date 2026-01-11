@@ -24,7 +24,7 @@ import {
 const StatCard = ({ title, value, icon: Icon, fromColor, toColor }) => (
   <div className="flex items-center bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
     <div
-      className={`flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-tr ${fromColor} ${toColor} text-white mr-4 shadow-lg`}
+      className={`flex items-center justify-center w-16 h-16 rounded-xl bg-linear-to-tr ${fromColor} ${toColor} text-white mr-4 shadow-lg`}
     >
       <Icon className="w-8 h-8" />
     </div>
@@ -48,30 +48,25 @@ const AdminStatistics = () => {
     },
   });
 
-  // Sample chart data (in real app, this would come from your API)
+  // Generate chart data from real statistics
   const loanTrendsData = [
-    { month: "Jan", applications: 45, approved: 32, rejected: 13 },
-    { month: "Feb", applications: 52, approved: 38, rejected: 14 },
-    { month: "Mar", applications: 48, approved: 35, rejected: 13 },
-    { month: "Apr", applications: 61, approved: 44, rejected: 17 },
-    { month: "May", applications: 55, approved: 41, rejected: 14 },
-    { month: "Jun", applications: 67, approved: 49, rejected: 18 },
+    {
+      month: "Current",
+      applications: stats.totalLoans || 0,
+      approved: stats.approvedLoans || 0,
+      rejected: stats.rejectedLoans || 0,
+      pending: stats.pendingLoans || 0,
+    },
   ];
 
   const loanStatusData = [
     { name: "Approved", value: stats.approvedLoans || 0, color: "#10B981" },
-    {
-      name: "Pending",
-      value:
-        (stats.totalLoans || 0) -
-        (stats.approvedLoans || 0) -
-        (stats.rejectedLoans || 0),
-      color: "#F59E0B",
-    },
+    { name: "Pending", value: stats.pendingLoans || 0, color: "#F59E0B" },
     { name: "Rejected", value: stats.rejectedLoans || 0, color: "#EF4444" },
+    { name: "Paid", value: stats.paidLoans || 0, color: "#8B5CF6" },
   ];
 
-  const COLORS = ["#10B981", "#F59E0B", "#EF4444"];
+  const COLORS = ["#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
   if (isLoading) {
     return <div className="text-center mt-20">Loading statistics...</div>;
@@ -79,37 +74,45 @@ const AdminStatistics = () => {
 
   return (
     <div className="container mx-auto px-4 mt-12">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-12">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-12">
         <StatCard
-          title="Total Loans Applied"
-          value={stats.totalLoans}
+          title="Total Applications"
+          value={stats.totalLoans || 0}
           icon={FaFileAlt}
           fromColor="from-amber-500"
           toColor="to-amber-400"
         />
 
         <StatCard
-          title="Approved Loans"
-          value={stats.approvedLoans}
+          title="Approved"
+          value={stats.approvedLoans || 0}
           icon={FaCheckCircle}
-          fromColor="from-orange-500"
-          toColor="to-orange-400"
+          fromColor="from-green-500"
+          toColor="to-green-400"
         />
 
         <StatCard
-          title="Rejected Loans"
-          value={stats.rejectedLoans}
+          title="Pending"
+          value={stats.pendingLoans || 0}
+          icon={FaFileAlt}
+          fromColor="from-yellow-500"
+          toColor="to-yellow-400"
+        />
+
+        <StatCard
+          title="Rejected"
+          value={stats.rejectedLoans || 0}
           icon={FaTimesCircle}
-          fromColor="from-yellow-600"
-          toColor="to-yellow-500"
+          fromColor="from-red-500"
+          toColor="to-red-400"
         />
 
         <StatCard
           title="Total Users"
-          value={stats.totalUsers}
+          value={stats.totalUsers || 0}
           icon={FaUsers}
-          fromColor="from-amber-600"
-          toColor="to-amber-500"
+          fromColor="from-blue-500"
+          toColor="to-blue-400"
         />
       </div>
 
@@ -130,18 +133,28 @@ const AdminStatistics = () => {
                 dataKey="applications"
                 stroke="#9c6c1e"
                 strokeWidth={3}
+                name="Total Applications"
               />
               <Line
                 type="monotone"
                 dataKey="approved"
                 stroke="#10B981"
                 strokeWidth={2}
+                name="Approved"
+              />
+              <Line
+                type="monotone"
+                dataKey="pending"
+                stroke="#F59E0B"
+                strokeWidth={2}
+                name="Pending"
               />
               <Line
                 type="monotone"
                 dataKey="rejected"
                 stroke="#EF4444"
                 strokeWidth={2}
+                name="Rejected"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -190,8 +203,13 @@ const AdminStatistics = () => {
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="applications" fill="#9c6c1e" name="Applications" />
+            <Bar
+              dataKey="applications"
+              fill="#9c6c1e"
+              name="Total Applications"
+            />
             <Bar dataKey="approved" fill="#10B981" name="Approved" />
+            <Bar dataKey="pending" fill="#F59E0B" name="Pending" />
             <Bar dataKey="rejected" fill="#EF4444" name="Rejected" />
           </BarChart>
         </ResponsiveContainer>
