@@ -6,7 +6,7 @@ import useAuth from "../../../hooks/useAuth";
 const StatCard = ({ title, value, icon: Icon, fromColor, toColor }) => (
   <div className="flex items-center bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow duration-300">
     <div
-      className={`flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-tr ${fromColor} ${toColor} text-white mr-4 shadow-lg`}
+      className={`flex items-center justify-center w-16 h-16 rounded-xl bg-linear-to-tr ${fromColor} ${toColor} text-white mr-4 shadow-lg`}
     >
       <Icon className="w-8 h-8" />
     </div>
@@ -95,10 +95,102 @@ const ManagerStatistics = () => {
 
       <div className="bg-white rounded-xl shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">
-          Loan Status Overview
+          Application Status Chart
         </h3>
-        <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
-          Chart Placeholder
+        <div className="space-y-6">
+          {/* Simple Bar Chart */}
+          <div className="flex items-end justify-around h-48 px-4">
+            <div className="flex flex-col items-center flex-1">
+              <div
+                className="w-12 bg-green-500 rounded-t transition-all duration-500"
+                style={{
+                  height: `${
+                    stats.totalApplications > 0
+                      ? ((stats.applicationStatus?.approved || 0) /
+                          stats.totalApplications) *
+                        150
+                      : 10
+                  }px`,
+                }}
+              ></div>
+              <span className="text-xs font-medium text-gray-600 mt-2">
+                Approved
+              </span>
+              <span className="text-sm font-bold text-green-600">
+                {stats.applicationStatus?.approved || 0}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center flex-1">
+              <div
+                className="w-12 bg-yellow-500 rounded-t transition-all duration-500"
+                style={{
+                  height: `${
+                    stats.totalApplications > 0
+                      ? ((stats.applicationStatus?.pending || 0) /
+                          stats.totalApplications) *
+                        150
+                      : 10
+                  }px`,
+                }}
+              ></div>
+              <span className="text-xs font-medium text-gray-600 mt-2">
+                Pending
+              </span>
+              <span className="text-sm font-bold text-yellow-600">
+                {stats.applicationStatus?.pending || 0}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center flex-1">
+              <div
+                className="w-12 bg-red-500 rounded-t transition-all duration-500"
+                style={{
+                  height: `${
+                    stats.totalApplications > 0
+                      ? ((stats.applicationStatus?.rejected || 0) /
+                          stats.totalApplications) *
+                        150
+                      : 10
+                  }px`,
+                }}
+              ></div>
+              <span className="text-xs font-medium text-gray-600 mt-2">
+                Rejected
+              </span>
+              <span className="text-sm font-bold text-red-600">
+                {stats.applicationStatus?.rejected || 0}
+              </span>
+            </div>
+          </div>
+
+          {/* Chart Legend */}
+          <div className="flex items-center justify-center space-x-6 text-sm">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-green-500 rounded mr-2"></div>
+              <span className="text-gray-600">Approved</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-yellow-500 rounded mr-2"></div>
+              <span className="text-gray-600">Pending</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
+              <span className="text-gray-600">Rejected</span>
+            </div>
+          </div>
+
+          {/* Total Summary */}
+          <div className="pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-600">
+                Total Applications
+              </span>
+              <span className="text-lg font-bold text-gray-900">
+                {stats.totalApplications || 0}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

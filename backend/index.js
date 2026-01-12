@@ -23,7 +23,7 @@ app.use(
       "https://loanlinkph.netlify.app",
       "http://loanlinkph.netlify.app",
     ],
-    credentials: true,
+    // credentials: true,
     optionSuccessStatus: 200,
   })
 );
@@ -173,6 +173,7 @@ async function run() {
       const loanData = {
         ...req.body,
         availability: "available",
+        home: "available",
       };
       const result = await loanCollection.insertOne(loanData);
       res.send(result);
@@ -182,8 +183,25 @@ async function run() {
     app.get("/loans", async (req, res) => {
       try {
         const limit = parseInt(req.query.limit) || 0;
-        let cursor = loanCollection.find({ availability: "available" });
-        if (limit > 0) cursor = cursor.limit(limit);
+        const home = req.query.home;
+        const filter = { availability: "available" };
+
+        if (home === "available") {
+          filter.$or = [{ home: "available" }, { home: { $exists: false } }];
+        } else if (home === "unavailable") {
+          filter.home = "unavailable";
+        }
+
+        let cursor;
+        if (req.query.random === "true") {
+          cursor = loanCollection.aggregate([
+            { $match: filter },
+            { $sample: { size: limit > 0 ? limit : 1000 } },
+          ]);
+        } else {
+          cursor = loanCollection.find(filter);
+          if (limit > 0) cursor = cursor.limit(limit);
+        }
         const result = await cursor.toArray();
         res.send(result);
       } catch (error) {
@@ -350,22 +368,45 @@ async function run() {
       verifyADMIN,
       async (req, res) => {
         const id = req.params.id;
-        const { availability } = req.body;
+        const { home } = req.body;
 
-        if (!["available", "unavailable"].includes(availability)) {
-          return res
-            .status(400)
-            .send({ message: "Invalid availability state" });
+        if (!["available", "unavailable"].includes(home)) {
+          return res.status(400).send({ message: "Invalid home state" });
         }
 
         const result = await loanCollection.updateOne(
           { _id: new ObjectId(id) },
-          { $set: { availability } }
+          { $set: { home } }
         );
 
         res.send({
           success: true,
-          message: `Loan is now ${availability}`,
+          message: `Home is now ${home}`,
+          result,
+        });
+      }
+    );
+
+    app.patch(
+      "/loans/toggle-home/:id",
+      verifyJWT,
+      verifyADMIN,
+      async (req, res) => {
+        const id = req.params.id;
+        const { home } = req.body;
+
+        if (!["available", "unavailable"].includes(home)) {
+          return res.status(400).send({ message: "Invalid home state" });
+        }
+
+        const result = await loanCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: { home } }
+        );
+
+        res.send({
+          success: true,
+          message: `Home is now ${home}`,
           result,
         });
       }
@@ -577,6 +618,22 @@ async function run() {
     //get manager stats
     app.get("/manager-stats", async (req, res) => {
       const managerEmail = req.query.email; // from frontend
+      console.log("Manager stats requested for:", managerEmail);
+
+      // First, let's see all applications to debug
+      const allApplications = await loanApplicationCollection
+        .find({})
+        .limit(10)
+        .toArray();
+      console.log(
+        "Sample applications from DB:",
+        allApplications.map((app) => ({
+          id: app._id,
+          status: app.status,
+          loanId: app.loanId,
+          userEmail: app.userEmail,
+        }))
+      );
 
       const loansAdded = await loanCollection.countDocuments({
         "manager.email": managerEmail,
@@ -592,11 +649,78 @@ async function run() {
         status: "pending",
       });
 
-      res.send({
-        loansAdded,
-        approved,
-        pending,
-      });
+      // Get all loan applications for this manager's loans
+      const managerLoans = await loanCollection
+        .find({
+          "manager.email": managerEmail,
+        })
+        .toArray();
+
+      const managerLoanIds = managerLoans.map((loan) => loan._id.toString());
+      console.log("Manager loan IDs:", managerLoanIds);
+
+      // Try a broader search - maybe loanId is stored differently
+      const applications = await loanApplicationCollection
+        .find({
+          $or: [
+            { loanId: { $in: managerLoanIds } },
+            { loanId: { $in: managerLoanIds.map((id) => new ObjectId(id)) } },
+          ],
+        })
+        .toArray();
+
+      console.log("Found applications:", applications.length);
+      console.log(
+        "Application statuses:",
+        applications.map((app) => ({
+          id: app._id,
+          status: app.status,
+          loanId: app.loanId,
+        }))
+      );
+
+      const totalApplications = applications.length;
+      const approvedApplications = applications.filter(
+        (app) => app.status === "Approved"
+      ).length;
+      const rejectedApplications = applications.filter(
+        (app) => app.status === "Rejected"
+      ).length;
+      const pendingApplications = applications.filter(
+        (app) => app.status === "Pending"
+      ).length;
+
+      // Calculate total loan amount and average interest rate
+      const totalLoanAmount = managerLoans.reduce(
+        (sum, loan) => sum + (loan.limit || 0),
+        0
+      );
+      const avgInterestRate =
+        managerLoans.length > 0
+          ? managerLoans.reduce((sum, loan) => sum + (loan.interest || 0), 0) /
+            managerLoans.length
+          : 0;
+
+      const result = {
+        data: {
+          totalLoanProducts: loansAdded,
+          totalApplications,
+          pendingApplications,
+          approvedApplications,
+          totalLoanAmount,
+          averageInterestRate: avgInterestRate,
+          rejectedApplications,
+          // For chart data
+          applicationStatus: {
+            approved: approvedApplications,
+            pending: pendingApplications,
+            rejected: rejectedApplications,
+          },
+        },
+      };
+
+      console.log("Manager stats result:", result);
+      res.send(result);
     });
 
     //borrower stats

@@ -50,20 +50,20 @@ const AllLoanData = ({ loan, refetch, onEdit }) => {
     }
   };
 
-  const enabled = loan.availability === "available" || !loan.availability; // Default to available if not set
+  const enabled = loan.home === "available" || !loan.home; // Default to available if not set
 
   const handleToggle = async () => {
     console.log(
       "Toggle clicked for loan:",
       loan._id,
-      "Current availability:",
-      loan.availability
+      "Current home:",
+      loan.home
     );
     try {
       const res = await axiosSecure.patch(
         `/loans/toggle-availability/${loan._id}`,
         {
-          availability: enabled ? "unavailable" : "available",
+          home: enabled ? "unavailable" : "available",
         }
       );
 

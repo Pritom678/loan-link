@@ -13,9 +13,11 @@ const LoanOption = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["loans"],
+    queryKey: ["loans", "home"],
     queryFn: async () => {
-      const result = await axiosSecure(`/loans?limit=6`);
+      const result = await axiosSecure(
+        `/loans?limit=6&home=available&random=true`
+      );
       return result.data;
     },
   });

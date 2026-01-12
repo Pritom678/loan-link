@@ -22,7 +22,7 @@ const AllLoansOptions = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["loans"],
+    queryKey: ["loans", "all"],
     queryFn: async () => {
       const result = await axiosSecure(`/loans`);
       return result.data;

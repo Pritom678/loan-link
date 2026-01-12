@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { imageUpload } from "../../utilities";
 import useAuth from "../../hooks/useAuth";
@@ -5,22 +6,22 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAxiosSecure from "../../hooks/useAxiosSecure";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../Shared/LoadingSpinner";
-import ErrorPage from "../../pages/ErrorPage";
 import { TbCoin } from "react-icons/tb";
 
 const AddLoanForm = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const {
     isPending,
-    isError,
     mutateAsync,
     reset: mutationReset,
   } = useMutation({
     mutationFn: async (payload) => {
-      await axiosSecure.post(`/loans`, payload);
+      const res = await axiosSecure.post(`/loans`, payload);
+      return res?.data;
     },
     onSuccess: (data) => {
       console.log(data);
@@ -33,6 +34,12 @@ const AddLoanForm = () => {
     },
     onError: (error) => {
       console.log(error);
+      const apiMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to add loan";
+      toast.error(apiMessage);
     },
     onMutate: (payload) => {
       console.log("I will post this data-->", payload);
@@ -50,6 +57,10 @@ const AddLoanForm = () => {
     reset,
   } = useForm();
 
+  const onInvalid = () => {
+    toast.error("Please fill all required fields");
+  };
+
   const onSubmit = async (data) => {
     const {
       title,
@@ -63,6 +74,7 @@ const AddLoanForm = () => {
     } = data;
     const imageFile = image[0];
     try {
+      setIsUploadingImage(true);
       const imageUrl = await imageUpload(imageFile);
       const loanData = {
         image: imageUrl,
@@ -84,13 +96,20 @@ const AddLoanForm = () => {
       reset();
     } catch (err) {
       console.log(err);
+      const apiMessage =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to add loan";
+      toast.error(apiMessage);
+    } finally {
+      setIsUploadingImage(false);
     }
   };
 
   const currentDate = new Date().toISOString().split("T")[0]; // auto date
 
-  if (isPending) return <LoadingSpinner />;
-  if (isError) return <ErrorPage />;
+  if (isPending || isUploadingImage) return <LoadingSpinner />;
   return (
     <div className="min-h-screen bg-linear-to-br from-amber-50 to-orange-50 py-8">
       <div className="container mx-auto px-4">
@@ -106,7 +125,7 @@ const AddLoanForm = () => {
           </div>
 
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit(onSubmit, onInvalid)}
             className="bg-white rounded-2xl shadow-xl p-8 border border-amber-100"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -311,7 +330,6 @@ const AddLoanForm = () => {
                   <input
                     type="file"
                     accept="image/*"
-                    multiple
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg bg-white cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 transition-all duration-200"
                     {...register("image", { required: "Image is required" })}
                   />
@@ -351,13 +369,15 @@ const AddLoanForm = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isPending || isUploadingImage}
                   className="w-full py-4 px-6 bg-linear-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {isPending ? (
+                  {isPending || isUploadingImage ? (
                     <div className="flex items-center justify-center">
                       <TbCoin className="animate-spin mr-2" />
-                      Creating Loan...
+                      {isUploadingImage
+                        ? "Uploading Image..."
+                        : "Creating Loan..."}
                     </div>
                   ) : (
                     "Create Loan Product"

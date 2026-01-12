@@ -9,7 +9,6 @@ const useAxiosSecure = () => {
   const [instance] = useState(() =>
     axios.create({
       baseURL: import.meta.env.VITE_API_URL,
-      withCredentials: true,
     })
   );
 
@@ -47,7 +46,7 @@ const useAxiosSecure = () => {
         const isRoleRequest =
           err?.config?.url?.includes("/user/role") ||
           err?.config?.url?.includes("-stats") ||
-          err?.config?.url?.includes("/loans/");
+          err?.config?.url?.includes("/loans");
 
         if (
           (err?.response?.status === 401 ||
